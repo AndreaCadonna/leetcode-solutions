@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sliding Window: Minimum Window Substring</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.2em;
+        opacity: 0.9;
+      }
+
+      .content-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        margin-bottom: 30px;
+      }
+
+      .section {
+        padding: 30px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .section:last-child {
+        border-bottom: none;
+      }
+
+      .section-title {
+        font-size: 1.8em;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::before {
+        content: "";
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 2px;
+      }
+
+      .subsection {
+        margin: 25px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+      }
+
+      .subsection h3 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+      }
+
+      .code-block {
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        overflow-x: auto;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        white-space: pre;
+        line-height: 1.5;
+        tab-size: 4;
+      }
+
+      .code-block .comment {
+        color: #68d391;
+      }
+      .code-block .keyword {
+        color: #f093fb;
+      }
+      .code-block .string {
+        color: #fbb6ce;
+      }
+
+      .visual-example {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .string-display {
+        font-family: "Courier New", monospace;
+        font-size: 18px;
+        margin: 15px 0;
+        text-align: center;
+      }
+
+      .word-chunk {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 3px;
+        border: 2px solid #cbd5e0;
+        border-radius: 6px;
+        background: #f7fafc;
+        min-width: 40px;
+        text-align: center;
+        transition: all 0.3s ease;
+        font-weight: bold;
+      }
+
+      .word-chunk:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .current-window {
+        background: #bee3f8;
+        border-color: #3182ce;
+        color: #2a4365;
+        border-width: 3px;
+      }
+
+      .target-char {
+        background: #c6f6d5;
+        border-color: #38a169;
+        color: #22543d;
+      }
+
+      .found-match {
+        background: #c6f6d5;
+        border-color: #38a169;
+        color: #22543d;
+        border-width: 3px;
+        box-shadow: 0 0 10px rgba(56, 161, 105, 0.3);
+      }
+
+      .left-pointer {
+        background: #fed7d7;
+        border-color: #e53e3e;
+        color: #742a2a;
+        border-width: 3px;
+      }
+
+      .step {
+        display: flex;
+        align-items: flex-start;
+        margin: 20px 0;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .step-counter {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+
+      .highlight-box {
+        background: linear-gradient(135deg, #667eea10, #764ba210);
+        border: 1px solid #667eea;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .tip-box {
+        background: #fffbeb;
+        border: 1px solid #f59e0b;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        border-left: 4px solid #f59e0b;
+      }
+
+      .tip-box h4 {
+        color: #92400e;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .tip-box h4::before {
+        content: "💡";
+      }
+
+      .problem-statement {
+        background: #e6fffa;
+        border: 1px solid #38b2ac;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .problem-statement h3 {
+        color: #234e52;
+        margin-bottom: 15px;
+      }
+
+      .complexity-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+
+      .complexity-table th,
+      .complexity-table td {
+        border: 1px solid #e2e8f0;
+        padding: 12px;
+        text-align: left;
+      }
+
+      .complexity-table th {
+        background: #f7fafc;
+        font-weight: bold;
+        color: #2d3748;
+      }
+
+      .complexity-table tr:nth-child(even) {
+        background: #f9f9f9;
+      }
+
+      .algorithm-flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .flow-step {
+        flex: 1;
+        min-width: 200px;
+        padding: 15px;
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        text-align: center;
+        position: relative;
+      }
+
+      .flow-step::after {
+        content: "→";
+        position: absolute;
+        right: -25px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+        color: #667eea;
+        font-weight: bold;
+      }
+
+      .flow-step:last-child::after {
+        display: none;
+      }
+
+      .freq-display {
+        display: inline-block;
+        background: #f0f8ff;
+        border: 1px solid #667eea;
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin: 5px;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+      }
+
+      .window-state {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        font-family: "Courier New", monospace;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
+        }
+        .header h1 {
+          font-size: 2em;
+        }
+        .algorithm-flow {
+          flex-direction: column;
+        }
+        .flow-step::after {
+          display: none;
+        }
+        .string-display {
+          font-size: 16px;
+        }
+        .word-chunk {
+          padding: 6px 8px;
+          min-width: 30px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎯 Sliding Window: Minimum Window Substring</h1>
+        <p>Master the Variable Sliding Window Pattern with Visual Learning</p>
+      </div>
+
+      <div class="content-card">
+        <div class="section">
+          <h2 class="section-title">🎯 Problem Understanding</h2>
+
+          <div class="problem-statement">
+            <h3>LeetCode 76: Minimum Window Substring</h3>
+            <p>
+              <strong>Given:</strong> Two strings <code>s</code> and
+              <code>t</code>
+            </p>
+            <p>
+              <strong>Find:</strong> The minimum window substring of
+              <code>s</code> that contains all characters in
+              <code>t</code> (including duplicates)
+            </p>
+            <p>
+              <strong>Return:</strong> Empty string if no such window exists
+            </p>
+          </div>
+
+          <div class="visual-example">
+            <h4>Example Visualization</h4>
+            <div class="string-display">
+              <strong>s = "ADOBECODEBANC"</strong>
+            </div>
+            <div class="string-display">
+              <span class="word-chunk">A</span>
+              <span class="word-chunk">D</span>
+              <span class="word-chunk">O</span>
+              <span class="word-chunk">B</span>
+              <span class="word-chunk">E</span>
+              <span class="word-chunk">C</span>
+              <span class="word-chunk">O</span>
+              <span class="word-chunk">D</span>
+              <span class="word-chunk">E</span>
+              <span class="word-chunk found-match">B</span>
+              <span class="word-chunk found-match">A</span>
+              <span class="word-chunk found-match">N</span>
+              <span class="word-chunk found-match">C</span>
+            </div>
+            <div class="string-display">
+              <strong>t = "ABC"</strong> → Answer: <strong>"BANC"</strong>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Why This Problem is Tricky</h3>
+            <ul>
+              <li>
+                <strong>Frequency Matching:</strong> Must handle duplicate
+                characters correctly
+              </li>
+              <li>
+                <strong>Minimum Length:</strong> Need to find the shortest valid
+                window
+              </li>
+              <li>
+                <strong>Efficiency Requirement:</strong> Must solve in O(m + n)
+                time for large inputs
+              </li>
+              <li>
+                <strong>Edge Cases:</strong> Empty strings, impossible cases,
+                exact matches
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🔍 Why Sliding Window?</h2>
+
+          <div class="subsection">
+            <h3>Brute Force Approach (Inefficient)</h3>
+            <div class="code-block">
+              def minWindow_bruteforce(s, t): """O(m² × n) - Check every
+              substring""" min_len = float('inf') result = "" for i in
+              range(len(s)): for j in range(i, len(s)): window = s[i:j+1] if
+              contains_all_chars(window, t): # O(n) check if len(window) <
+              min_len: min_len = len(window) result = window return result
+            </div>
+          </div>
+
+          <div class="highlight-box">
+            <h3>🔑 Sliding Window Insight</h3>
+            <p>
+              <strong>Key Realization:</strong> Instead of checking every
+              possible substring, we can maintain a "window" that expands and
+              shrinks efficiently!
+            </p>
+
+            <div class="algorithm-flow">
+              <div class="flow-step">
+                <strong>Expand</strong><br />
+                Add characters until window is valid
+              </div>
+              <div class="flow-step">
+                <strong>Record</strong><br />
+                Save current window if it's smaller
+              </div>
+              <div class="flow-step">
+                <strong>Shrink</strong><br />
+                Remove characters while maintaining validity
+              </div>
+              <div class="flow-step">
+                <strong>Repeat</strong><br />
+                Continue until end of string
+              </div>
+            </div>
+          </div>
+
+          <div class="tip-box">
+            <h4>Pattern Recognition</h4>
+            <p>
+              This is a <strong>Variable Sliding Window</strong> problem
+              because:
+            </p>
+            <ul>
+              <li>We need a contiguous substring (window)</li>
+              <li>The window size changes based on validity</li>
+              <li>We want to minimize the window length</li>
+              <li>Each character is processed at most twice</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">⚙️ Algorithm Deep Dive</h2>
+
+          <div class="subsection">
+            <h3>Core Data Structures</h3>
+            <div class="visual-example">
+              <div class="freq-display">
+                <strong>target_freq:</strong> {'A': 1, 'B': 1, 'C': 1}
+              </div>
+              <div class="freq-display">
+                <strong>window_freq:</strong> {'A': 0, 'B': 0, 'C': 0, ...}
+              </div>
+              <div class="freq-display">
+                <strong>satisfied_chars:</strong> 0 / 3
+              </div>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>The Two-Pointer Strategy</h3>
+            <div class="visual-example">
+              <h4>Window Operations</h4>
+              <div class="string-display">
+                <span class="word-chunk left-pointer">L</span>
+                <span class="word-chunk current-window">Window</span>
+                <span class="word-chunk current-window">Content</span>
+                <span class="word-chunk current-window">Here</span>
+                <span class="word-chunk">R</span>
+                <span class="word-chunk">→</span>
+              </div>
+              <p><strong>Left Pointer:</strong> Start of current window</p>
+              <p>
+                <strong>Right Pointer:</strong> End of current window (expands)
+              </p>
+            </div>
+          </div>
+
+          <div class="code-block">
+            class Solution(object): def minWindow(self, s, t): """ Find minimum
+            window substring containing all characters of t. Time: O(m + n),
+            Space: O(m + n) """ if not s or not t or len(s) < len(t): return ""
+            # Build frequency map for target string t target_freq = {} for char
+            in t: target_freq[char] = target_freq.get(char, 0) + 1 # Sliding
+            window variables left = 0 min_window_start = 0 min_window_len =
+            float('inf') # Track how many unique characters we've satisfied
+            required_chars = len(target_freq) satisfied_chars = 0 # Current
+            window frequency map window_freq = {} # Expand window with right
+            pointer for right in range(len(s)): char = s[right] # Add character
+            to window window_freq[char] = window_freq.get(char, 0) + 1 # Check
+            if this character's frequency requirement is satisfied if char in
+            target_freq and window_freq[char] == target_freq[char]:
+            satisfied_chars += 1 # Try to shrink window while it remains valid
+            while satisfied_chars == required_chars: # Update minimum window if
+            current is smaller if right - left + 1 < min_window_len:
+            min_window_len = right - left + 1 min_window_start = left # Remove
+            leftmost character from window left_char = s[left]
+            window_freq[left_char] -= 1 # Check if removing breaks a requirement
+            if left_char in target_freq and window_freq[left_char] <
+            target_freq[left_char]: satisfied_chars -= 1 left += 1 return "" if
+            min_window_len == float('inf') else
+            s[min_window_start:min_window_start + min_window_len]
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📊 Complete Example Walkthrough</h2>
+
+          <div class="subsection">
+            <h3>Input: s = "ADOBECODEBANC", t = "ABC"</h3>
+
+            <div class="step">
+              <div class="step-counter">1</div>
+              <div>
+                <h4>Setup Phase</h4>
+                <div class="window-state">
+                  target_freq = {'A': 1, 'B': 1, 'C': 1} required_chars = 3,
+                  satisfied_chars = 0 left = 0, right will expand →
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">2</div>
+              <div>
+                <h4>Expand: Add 'A' at position 0</h4>
+                <div class="string-display">
+                  <span class="word-chunk current-window">A</span>
+                  <span class="word-chunk">D</span>
+                  <span class="word-chunk">O</span>
+                  <span class="word-chunk">B</span>
+                  <span class="word-chunk">E</span>
+                  <span class="word-chunk">C</span>
+                  <span class="word-chunk">O</span>
+                  <span class="word-chunk">D</span>
+                  <span class="word-chunk">E</span>
+                  <span class="word-chunk">B</span>
+                  <span class="word-chunk">A</span>
+                  <span class="word-chunk">N</span>
+                  <span class="word-chunk">C</span>
+                </div>
+                <div class="window-state">
+                  window_freq = {'A': 1} satisfied_chars = 1 (A requirement
+                  met!)
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">3</div>
+              <div>
+                <h4>Expand: Add 'D', 'O', 'B' (positions 1-3)</h4>
+                <div class="string-display">
+                  <span class="word-chunk current-window">A</span>
+                  <span class="word-chunk current-window">D</span>
+                  <span class="word-chunk current-window">O</span>
+                  <span class="word-chunk current-window">B</span>
+                  <span class="word-chunk">E</span>
+                  <span class="word-chunk">C</span>
+                  <span class="word-chunk">O</span>
+                  <span class="word-chunk">D</span>
+                  <span class="word-chunk">E</span>
+                  <span class="word-chunk">B</span>
+                  <span class="word-chunk">A</span>
+                  <span class="word-chunk">N</span>
+                  <span class="word-chunk">C</span>
+                </div>
+                <div class="window-state">
+                  window_freq = {'A': 1, 'D': 1, 'O': 1, 'B': 1} satisfied_chars
+                  = 2 (A and B requirements met!)
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">4</div>
+              <div>
+                <h4>
+                  Expand: Add 'E', 'C' (positions 4-5) - FIRST VALID WINDOW!
+                </h4>
+                <div class="string-display">
+                  <span class="word-chunk found-match">A</span>
+                  <span class="word-chunk found-match">D</span>
+                  <span class="word-chunk found-match">O</span>
+                  <span class="word-chunk found-match">B</span>
+                  <span class="word-chunk found-match">E</span>
+                  <span class="word-chunk found-match">C</span>
+                  <span class="word-chunk">O</span>
+                  <span class="word-chunk">D</span>
+                  <span class="word-chunk">E</span>
+                  <span class="word-chunk">B</span>
+                  <span class="word-chunk">A</span>
+                  <span class="word-chunk">N</span>
+                  <span class="word-chunk">C</span>
+                </div>
+                <div class="window-state">
+                  window_freq = {'A': 1, 'D': 1, 'O': 1, 'B': 1, 'E': 1, 'C': 1}
+                  satisfied_chars = 3 ✅ VALID! Window = "ADOBEC" (length 6) Now
+                  try to shrink...
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">5</div>
+              <div>
+                <h4>Shrink: Remove 'A' - Window becomes invalid</h4>
+                <div class="string-display">
+                  <span class="word-chunk left-pointer">A</span>
+                  <span class="word-chunk current-window">D</span>
+                  <span class="word-chunk current-window">O</span>
+                  <span class="word-chunk current-window">B</span>
+                  <span class="word-chunk current-window">E</span>
+                  <span class="word-chunk current-window">C</span>
+                  <span class="word-chunk">O</span>
+                  <span class="word-chunk">D</span>
+                  <span class="word-chunk">E</span>
+                  <span class="word-chunk">B</span>
+                  <span class="word-chunk">A</span>
+                  <span class="word-chunk">N</span>
+                  <span class="word-chunk">C</span>
+                </div>
+                <div class="window-state">
+                  window_freq = {'A': 0, 'D': 1, 'O': 1, 'B': 1, 'E': 1, 'C': 1}
+                  satisfied_chars = 2 ❌ Invalid - continue expanding
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">6</div>
+              <div>
+                <h4>Continue expanding... Eventually find "BANC"</h4>
+                <div class="string-display">
+                  <span class="word-chunk">A</span>
+                  <span class="word-chunk">D</span>
+                  <span class="word-chunk">O</span>
+                  <span class="word-chunk">B</span>
+                  <span class="word-chunk">E</span>
+                  <span class="word-chunk">C</span>
+                  <span class="word-chunk">O</span>
+                  <span class="word-chunk">D</span>
+                  <span class="word-chunk">E</span>
+                  <span class="word-chunk found-match">B</span>
+                  <span class="word-chunk found-match">A</span>
+                  <span class="word-chunk found-match">N</span>
+                  <span class="word-chunk found-match">C</span>
+                </div>
+                <div class="window-state">
+                  Final answer: "BANC" (length 4) - minimum window found! 🎉
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📈 Complexity Analysis</h2>
+
+          <table class="complexity-table">
+            <thead>
+              <tr>
+                <th>Approach</th>
+                <th>Time Complexity</th>
+                <th>Space Complexity</th>
+                <th>Explanation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Brute Force</td>
+                <td>O(m² × n)</td>
+                <td>O(n)</td>
+                <td>Check all O(m²) substrings, O(n) to validate each</td>
+              </tr>
+              <tr>
+                <td>Sliding Window</td>
+                <td>O(m + n)</td>
+                <td>O(m + n)</td>
+                <td>Each char visited at most twice, frequency maps</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="highlight-box">
+            <h3>🎯 Why O(m + n) Time?</h3>
+            <ul>
+              <li>
+                <strong>Right pointer:</strong> Visits each character in s
+                exactly once → O(m)
+              </li>
+              <li>
+                <strong>Left pointer:</strong> Each character removed at most
+                once → O(m)
+              </li>
+              <li>
+                <strong>Target frequency:</strong> Build frequency map for t →
+                O(n)
+              </li>
+              <li><strong>Total:</strong> O(m) + O(m) + O(n) = O(m + n)</li>
+            </ul>
+          </div>
+
+          <div class="highlight-box">
+            <h3>📊 Space Complexity Breakdown</h3>
+            <ul>
+              <li><strong>target_freq:</strong> O(n) for characters in t</li>
+              <li>
+                <strong>window_freq:</strong> O(m) for characters in current
+                window
+              </li>
+              <li><strong>Total:</strong> O(m + n) space</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">💡 Pro Tips & Tricks</h2>
+
+          <div class="tip-box">
+            <h4>Implementation Optimizations</h4>
+            <ul>
+              <li>
+                <strong>Use satisfied_chars counter:</strong> Instead of
+                comparing entire frequency maps
+              </li>
+              <li>
+                <strong>Careful with removal:</strong> Only decrement
+                satisfied_chars when dropping below requirement
+              </li>
+              <li>
+                <strong>Edge case handling:</strong> Check for empty strings and
+                impossible cases early
+              </li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>Interview Communication</h4>
+            <ul>
+              <li>
+                <strong>Start with brute force:</strong> Shows you understand
+                the problem
+              </li>
+              <li>
+                <strong>Explain the intuition:</strong> "Expand until valid,
+                shrink to optimize"
+              </li>
+              <li>
+                <strong>Highlight key insight:</strong> Tracking satisfied
+                requirements vs full frequency comparison
+              </li>
+              <li>
+                <strong>Mention complexity:</strong> Explicitly state the O(m+n)
+                optimization
+              </li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>Common Debugging Points</h4>
+            <ul>
+              <li>
+                <strong>Off-by-one errors:</strong> Window length = right - left
+                + 1
+              </li>
+              <li>
+                <strong>Shrinking logic:</strong> Update satisfied_chars
+                correctly when removing
+              </li>
+              <li>
+                <strong>Duplicate handling:</strong> Frequency maps handle
+                duplicates naturally
+              </li>
+              <li>
+                <strong>Empty result:</strong> Check if min_window_len was ever
+                updated
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🧪 Additional Examples & Edge Cases</h2>
+
+          <div class="subsection">
+            <h3>Edge Case 1: Exact Match</h3>
+            <div class="visual-example">
+              <div class="string-display">
+                <strong>Input:</strong> s = "a", t = "a"
+              </div>
+              <div class="string-display">
+                <span class="word-chunk found-match">a</span>
+              </div>
+              <div class="string-display"><strong>Output:</strong> "a"</div>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Edge Case 2: Impossible Case</h3>
+            <div class="visual-example">
+              <div class="string-display">
+                <strong>Input:</strong> s = "a", t = "aa"
+              </div>
+              <div class="string-display">
+                <span class="word-chunk">a</span> ← Only one 'a' available
+              </div>
+              <div class="string-display">
+                <strong>Output:</strong> "" (empty string)
+              </div>
+              <p>
+                <strong>Explanation:</strong> Need two 'a's but only one exists
+                in s
+              </p>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Edge Case 3: Multiple Valid Windows</h3>
+            <div class="visual-example">
+              <div class="string-display">
+                <strong>Input:</strong> s = "ADOBECODEBANC", t = "ABC"
+              </div>
+              <div class="string-display">
+                Window 1: <span class="word-chunk">A</span
+                ><span class="word-chunk">D</span
+                ><span class="word-chunk">O</span
+                ><span class="word-chunk">B</span
+                ><span class="word-chunk">E</span
+                ><span class="word-chunk">C</span> (length 6)
+              </div>
+              <div class="string-display">
+                Window 2: <span class="word-chunk found-match">B</span
+                ><span class="word-chunk found-match">A</span
+                ><span class="word-chunk found-match">N</span
+                ><span class="word-chunk found-match">C</span> (length 4) ←
+                Minimum
+              </div>
+              <div class="string-display">
+                <strong>Output:</strong> "BANC" (shortest window wins)
+              </div>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Edge Case 4: Duplicate Characters in Target</h3>
+            <div class="visual-example">
+              <div class="string-display">
+                <strong>Input:</strong> s = "AABBCC", t = "AAB"
+              </div>
+              <div class="window-state">
+                target_freq = {'A': 2, 'B': 1} ← Need TWO A's and ONE B
+              </div>
+              <div class="string-display">
+                <span class="word-chunk found-match">A</span
+                ><span class="word-chunk found-match">A</span
+                ><span class="word-chunk found-match">B</span
+                ><span class="word-chunk">B</span
+                ><span class="word-chunk">C</span
+                ><span class="word-chunk">C</span>
+              </div>
+              <div class="string-display"><strong>Output:</strong> "AAB"</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🔧 Optimization Techniques</h2>
+
+          <div class="subsection">
+            <h3>Optimization 1: Early Termination</h3>
+            <div class="code-block">
+              def minWindow_optimized(s, t): """Early termination when
+              impossible""" if not s or not t or len(s) < len(t): return "" #
+              <span class="comment"># Impossible case - exit early</span>
+
+              # Check if s contains all characters of t s_chars = set(s) for
+              char in t: if char not in s_chars: return "" #
+              <span class="comment"># Missing character - impossible</span>
+
+              # Continue with normal algorithm...
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Optimization 2: Filtered String (Advanced)</h3>
+            <div class="code-block">
+              def minWindow_filtered(s, t): """Filter s to only include
+              characters from t""" target_chars = set(t) # Create filtered list:
+              [(char, original_index), ...] filtered = [] for i, char in
+              enumerate(s): if char in target_chars: filtered.append((char, i))
+              # Run sliding window on filtered list # This reduces the search
+              space significantly
+            </div>
+            <div class="tip-box">
+              <h4>When to Use</h4>
+              <p>
+                This optimization is most effective when |t| << |s| and s
+                contains many irrelevant characters.
+              </p>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Optimization 3: Character Array vs HashMap</h3>
+            <div class="code-block">
+              def minWindow_array(s, t): """Use arrays instead of hashmaps for
+              ASCII characters""" if not s or not t: return "" # Use arrays for
+              faster access (ASCII optimization) target_count = [0] * 128 #
+              <span class="comment"># ASCII character set</span> window_count =
+              [0] * 128 for char in t: target_count[ord(char)] += 1 # Rest of
+              algorithm using array indexing...
+            </div>
+            <div class="tip-box">
+              <h4>Performance Gain</h4>
+              <p>
+                Array access is faster than hashmap lookup, but only works for
+                limited character sets.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🎓 Related Problems & Variations</h2>
+
+          <div class="subsection">
+            <h3>Same Pattern Problems</h3>
+            <div class="algorithm-flow">
+              <div class="flow-step">
+                <strong>LeetCode 438</strong><br />
+                Find All Anagrams in a String<br />
+                <em>Fixed window size</em>
+              </div>
+              <div class="flow-step">
+                <strong>LeetCode 567</strong><br />
+                Permutation in String<br />
+                <em>Character frequency matching</em>
+              </div>
+              <div class="flow-step">
+                <strong>LeetCode 3</strong><br />
+                Longest Substring Without Repeating<br />
+                <em>Variable window expansion</em>
+              </div>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Advanced Variations</h3>
+            <ul>
+              <li>
+                <strong>LeetCode 727:</strong> Minimum Window Subsequence (not
+                contiguous)
+              </li>
+              <li>
+                <strong>LeetCode 992:</strong> Subarrays with K Different
+                Integers
+              </li>
+              <li>
+                <strong>Custom:</strong> Minimum window with at least K
+                occurrences of each character
+              </li>
+              <li>
+                <strong>Custom:</strong> Maximum window with at most K distinct
+                characters
+              </li>
+            </ul>
+          </div>
+
+          <div class="highlight-box">
+            <h3>🎯 Pattern Progression for Mastery</h3>
+            <ol>
+              <li>
+                <strong>Start:</strong> LeetCode 3 (simpler sliding window)
+              </li>
+              <li>
+                <strong>Practice:</strong> LeetCode 438 (fixed window with
+                frequency)
+              </li>
+              <li>
+                <strong>Master:</strong> LeetCode 76 (variable window with
+                frequency)
+              </li>
+              <li>
+                <strong>Expert:</strong> LeetCode 727 (subsequence variation)
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📝 Interview Preparation Checklist</h2>
+
+          <div class="algorithm-flow">
+            <div class="flow-step">
+              <strong>✅ Understanding</strong><br />
+              □ Explain sliding window concept<br />
+              □ Understand frequency tracking<br />
+              □ Know expand vs shrink logic
+            </div>
+            <div class="flow-step">
+              <strong>✅ Implementation</strong><br />
+              □ Code from scratch in 15-20 min<br />
+              □ Handle all edge cases<br />
+              □ Explain while coding
+            </div>
+            <div class="flow-step">
+              <strong>✅ Analysis</strong><br />
+              □ Derive O(m+n) complexity<br />
+              □ Compare with brute force<br />
+              □ Discuss space trade-offs
+            </div>
+            <div class="flow-step">
+              <strong>✅ Communication</strong><br />
+              □ Walk through example clearly<br />
+              □ Explain optimization techniques<br />
+              □ Discuss variations
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Key Interview Talking Points</h3>
+            <div class="step">
+              <div class="step-counter">1</div>
+              <div>
+                <h4>Problem Recognition</h4>
+                <p>
+                  "This is a minimum window problem, which suggests a variable
+                  sliding window approach with frequency tracking."
+                </p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">2</div>
+              <div>
+                <h4>Algorithm Strategy</h4>
+                <p>
+                  "I'll use two pointers - expand the window until it's valid,
+                  then shrink to minimize while maintaining validity."
+                </p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">3</div>
+              <div>
+                <h4>Optimization Insight</h4>
+                <p>
+                  "The key optimization is tracking satisfied character counts
+                  instead of comparing entire frequency maps each time."
+                </p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">4</div>
+              <div>
+                <h4>Complexity Analysis</h4>
+                <p>
+                  "Each character is visited at most twice (once by right
+                  pointer, once by left), giving us O(m+n) time complexity."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="tip-box">
+            <h4>Common Interview Questions</h4>
+            <ul>
+              <li>
+                <strong>Q:</strong> "What if we need the lexicographically
+                smallest window?"<br />
+                <strong>A:</strong> Track all minimum windows and compare
+                lexicographically.
+              </li>
+              <li>
+                <strong>Q:</strong> "How would you handle Unicode
+                characters?"<br />
+                <strong>A:</strong> HashMap approach works fine, array
+                optimization doesn't.
+              </li>
+              <li>
+                <strong>Q:</strong> "What about case sensitivity?"<br />
+                <strong>A:</strong> Convert to lowercase or track cases
+                separately in frequency map.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🚀 Final Code Implementation</h2>
+
+          <div class="code-block">
+            class Solution(object): def minWindow(self, s, t): """ Find the
+            minimum window substring containing all characters of t. Args: s
+            (str): Source string to search in (length m) t (str): Target string
+            with required characters (length n) Returns: str: Minimum window
+            substring or empty string if none exists Time Complexity: O(m + n)
+            Space Complexity: O(m + n) """ # Edge case handling if not s or not
+            t or len(s) < len(t): return "" # Build frequency map for target
+            string t target_freq = {} for char in t: target_freq[char] =
+            target_freq.get(char, 0) + 1 # Sliding window variables left = 0
+            min_window_start = 0 min_window_len = float('inf') # Track how many
+            unique characters we've satisfied required_chars = len(target_freq)
+            satisfied_chars = 0 # Current window frequency map window_freq = {}
+            # Expand window with right pointer for right in range(len(s)): char
+            = s[right] # Add character to current window window_freq[char] =
+            window_freq.get(char, 0) + 1 # Check if this character's frequency
+            requirement is now satisfied if char in target_freq and
+            window_freq[char] == target_freq[char]: satisfied_chars += 1 # Try
+            to shrink window while it remains valid while satisfied_chars ==
+            required_chars: # Update minimum window if current window is smaller
+            current_window_len = right - left + 1 if current_window_len <
+            min_window_len: min_window_len = current_window_len min_window_start
+            = left # Remove leftmost character from window left_char = s[left]
+            window_freq[left_char] -= 1 # Check if removing this character
+            breaks a requirement if left_char in target_freq and
+            window_freq[left_char] < target_freq[left_char]: satisfied_chars -=
+            1 # Move left pointer forward left += 1 # Return minimum window or
+            empty string if none found return "" if min_window_len ==
+            float('inf') else s[min_window_start:min_window_start +
+            min_window_len]
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🎯 When to Use This Pattern</h2>
+
+          <div class="highlight-box">
+            <h3>🎯 Sliding Window Pattern Recognition</h3>
+            <p>
+              Use the sliding window pattern when you see these characteristics:
+            </p>
+
+            <div class="algorithm-flow">
+              <div class="flow-step">
+                <strong>Contiguous</strong><br />
+                Need substring or subarray<br />
+                (not subsequence)
+              </div>
+              <div class="flow-step">
+                <strong>Optimization</strong><br />
+                Find minimum/maximum<br />
+                based on some condition
+              </div>
+              <div class="flow-step">
+                <strong>Constraint</strong><br />
+                Window validity depends<br />
+                on content/frequency
+              </div>
+              <div class="flow-step">
+                <strong>Efficiency</strong><br />
+                Brute force would be<br />
+                O(n²) or worse
+              </div>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Problem Keywords That Signal Sliding Window</h3>
+            <ul>
+              <li>
+                <strong>"Minimum window"</strong> - Variable sliding window
+              </li>
+              <li>
+                <strong>"Maximum subarray"</strong> - Often sliding window
+              </li>
+              <li>
+                <strong>"Contains all characters"</strong> - Frequency-based
+                window
+              </li>
+              <li>
+                <strong>"At most K distinct"</strong> - Constraint-based window
+              </li>
+              <li>
+                <strong>"Longest substring"</strong> - Expanding window strategy
+              </li>
+              <li>
+                <strong>"All anagrams"</strong> - Fixed window with frequency
+              </li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>Quick Pattern Decision Tree</h4>
+            <ol>
+              <li>
+                <strong>Is it contiguous?</strong> → If no, consider DP or other
+                patterns
+              </li>
+              <li>
+                <strong>Is it optimization-based?</strong> → If no, might be
+                simple iteration
+              </li>
+              <li>
+                <strong>Does window validity change?</strong> → If yes, variable
+                sliding window
+              </li>
+              <li>
+                <strong>Is window size fixed?</strong> → If yes, fixed sliding
+                window
+              </li>
+              <li>
+                <strong>Need frequency tracking?</strong> → Use HashMap-based
+                approach
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🏆 Mastery Summary</h2>
+
+          <div class="highlight-box">
+            <h3>🎯 Key Insights Mastered</h3>
+            <ul>
+              <li>
+                <strong>Pattern Recognition:</strong> "Minimum window
+                containing..." signals variable sliding window
+              </li>
+              <li>
+                <strong>Two-Phase Strategy:</strong> Expand until valid, then
+                shrink to optimize
+              </li>
+              <li>
+                <strong>Frequency Optimization:</strong> Track satisfied
+                requirements vs full map comparisons
+              </li>
+              <li>
+                <strong>Complexity Achievement:</strong> O(m+n) through each
+                character visiting at most twice
+              </li>
+              <li>
+                <strong>Edge Case Mastery:</strong> Handle empty strings,
+                impossible cases, and duplicates
+              </li>
+            </ul>
+          </div>
+
+          <div class="algorithm-flow">
+            <div class="flow-step">
+              <strong>🎯 Pattern</strong><br />
+              Variable Sliding Window<br />
+              with Frequency Tracking
+            </div>
+            <div class="flow-step">
+              <strong>⚡ Strategy</strong><br />
+              Expand → Check → Shrink<br />
+              → Record → Repeat
+            </div>
+            <div class="flow-step">
+              <strong>🚀 Complexity</strong><br />
+              O(m + n) time<br />
+              O(m + n) space
+            </div>
+            <div class="flow-step">
+              <strong>💡 Key Insight</strong><br />
+              Each character visited<br />
+              at most twice
+            </div>
+          </div>
+
+          <div class="tip-box">
+            <h4>Next Steps for Mastery</h4>
+            <ul>
+              <li>
+                <strong>Practice variations:</strong> LeetCode 438, 567, 3, 727
+              </li>
+              <li>
+                <strong>Try optimizations:</strong> Array-based frequency,
+                filtered strings
+              </li>
+              <li>
+                <strong>Implement from memory:</strong> Code without reference
+                in under 20 minutes
+              </li>
+              <li>
+                <strong>Teach others:</strong> Explain the pattern to solidify
+                understanding
+              </li>
+            </ul>
+          </div>
+
+          <div class="visual-example">
+            <div class="string-display">
+              <strong>🎉 Congratulations!</strong>
+            </div>
+            <div class="string-display">
+              You've mastered one of the most important coding interview
+              patterns!
+            </div>
+            <div class="string-display">
+              <span class="word-chunk found-match">Pattern</span>
+              <span class="word-chunk found-match">Recognition</span>
+              <span class="word-chunk found-match">Achieved!</span>
+            </div>
+          </div>
+
+          <blockquote
+            style="
+              font-style: italic;
+              text-align: center;
+              color: #667eea;
+              font-size: 1.2em;
+              margin: 20px 0;
+            "
+          >
+            <strong
+              >"Master the expand-shrink rhythm, and you'll conquer any sliding
+              window challenge!"</strong
+            >
+          </blockquote>
+
+          <div
+            class="string-display"
+            style="text-align: center; font-size: 1.5em; margin-top: 30px"
+          >
+            🎯 <strong>Pattern mastered, interview ready!</strong> 🚀
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
