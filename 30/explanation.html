@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sliding Window Pattern: Complete Guide</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.2em;
+        opacity: 0.9;
+      }
+
+      .content-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        margin-bottom: 30px;
+      }
+
+      .section {
+        padding: 30px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .section:last-child {
+        border-bottom: none;
+      }
+
+      .section-title {
+        font-size: 1.8em;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::before {
+        content: "";
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 2px;
+      }
+
+      .subsection {
+        margin: 25px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+      }
+
+      .subsection h3 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+      }
+
+      .code-block {
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        overflow-x: auto;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        white-space: pre;
+        line-height: 1.5;
+        tab-size: 4;
+      }
+
+      .code-block .comment {
+        color: #68d391;
+      }
+
+      .code-block .keyword {
+        color: #f093fb;
+      }
+
+      .code-block .string {
+        color: #fbb6ce;
+      }
+
+      .visual-example {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .string-display {
+        font-family: "Courier New", monospace;
+        font-size: 16px;
+        margin: 15px 0;
+      }
+
+      .word-chunk {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 3px;
+        border: 2px solid #cbd5e0;
+        border-radius: 6px;
+        background: #f7fafc;
+        min-width: 40px;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .word-chunk:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .valid-word {
+        background: #c6f6d5;
+        border-color: #38a169;
+        color: #22543d;
+      }
+
+      .invalid-word {
+        background: #fed7d7;
+        border-color: #e53e3e;
+        color: #742a2a;
+        text-decoration: line-through;
+      }
+
+      .current-window {
+        background: #bee3f8;
+        border-color: #3182ce;
+        color: #2a4365;
+        border-width: 3px;
+      }
+
+      .found-match {
+        background: #c6f6d5;
+        border-color: #38a169;
+        color: #22543d;
+        border-width: 3px;
+        box-shadow: 0 0 10px rgba(56, 161, 105, 0.3);
+      }
+
+      .step-counter {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+
+      .step {
+        display: flex;
+        align-items: flex-start;
+        margin: 20px 0;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .step-content {
+        flex: 1;
+      }
+
+      .step-title {
+        font-weight: bold;
+        color: #2d3748;
+        margin-bottom: 10px;
+      }
+
+      .highlight-box {
+        background: linear-gradient(135deg, #667eea10, #764ba210);
+        border: 1px solid #667eea;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .tip-box {
+        background: #fffbeb;
+        border: 1px solid #f59e0b;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        border-left: 4px solid #f59e0b;
+      }
+
+      .tip-box h4 {
+        color: #92400e;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .tip-box h4::before {
+        content: "💡";
+      }
+
+      .complexity-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+
+      .complexity-table th,
+      .complexity-table td {
+        border: 1px solid #e2e8f0;
+        padding: 12px;
+        text-align: left;
+      }
+
+      .complexity-table th {
+        background: #f7fafc;
+        font-weight: bold;
+        color: #2d3748;
+      }
+
+      .complexity-table tr:nth-child(even) {
+        background: #f9f9f9;
+      }
+
+      .algorithm-flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .flow-step {
+        flex: 1;
+        min-width: 200px;
+        padding: 15px;
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        text-align: center;
+        position: relative;
+      }
+
+      .flow-step::after {
+        content: "→";
+        position: absolute;
+        right: -25px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+        color: #667eea;
+        font-weight: bold;
+      }
+
+      .flow-step:last-child::after {
+        display: none;
+      }
+
+      .flow-step h4 {
+        color: #2d3748;
+        margin-bottom: 8px;
+      }
+
+      .positions-display {
+        font-size: 12px;
+        color: #718096;
+        margin-bottom: 5px;
+        font-family: monospace;
+      }
+
+      ul {
+        margin: 15px 0;
+        padding-left: 25px;
+      }
+
+      li {
+        margin: 8px 0;
+      }
+
+      .problem-statement {
+        background: #e6fffa;
+        border: 1px solid #38b2ac;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .problem-statement h3 {
+        color: #234e52;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎯 Sliding Window Pattern</h1>
+        <p>Master Guide for Substring with Concatenation of All Words</p>
+      </div>
+
+      <div class="content-card">
+        <div class="section">
+          <h2 class="section-title">🎯 Problem Understanding</h2>
+
+          <div class="problem-statement">
+            <h3>LeetCode Problem: Substring with Concatenation of All Words</h3>
+            <p>
+              <strong>Given:</strong> A string <code>s</code> and an array of
+              words <code>words</code> (all same length)
+            </p>
+            <p>
+              <strong>Find:</strong> All starting indices where substrings are
+              concatenations of ALL words in ANY permutation
+            </p>
+            <p>
+              <strong>Example:</strong> s="barfoothefoobarman",
+              words=["foo","bar"] → [0,9]
+            </p>
+          </div>
+
+          <div class="subsection">
+            <h3>Why This Problem is Tricky</h3>
+            <ul>
+              <li>
+                <strong>Permutation complexity:</strong> Need to find ANY
+                arrangement of words
+              </li>
+              <li>
+                <strong>Exact matching:</strong> Must use ALL words exactly once
+              </li>
+              <li>
+                <strong>Multiple solutions:</strong> Can have overlapping or
+                non-overlapping matches
+              </li>
+              <li>
+                <strong>Alignment issues:</strong> Valid concatenations can
+                start at any position
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🔍 Why Sliding Window?</h2>
+
+          <div class="subsection">
+            <h3>Brute Force Approach (Inefficient)</h3>
+            <div class="code-block">
+              <span class="keyword">for</span> each position i
+              <span class="keyword">in</span> s: substring = s[i:i+total_length]
+              <span class="keyword">if</span> substring is permutation of words:
+              add i to result
+              <span class="comment"
+                >// Time: O(n × m × k) where n=len(s), m=len(words),
+                k=word_length</span
+              >
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Sliding Window Insight</h3>
+            <div class="highlight-box">
+              <p>
+                <strong>Key Realization:</strong> Instead of checking every
+                possible substring, we can maintain a "window" that slides
+                through the string, keeping track of word frequencies
+                efficiently.
+              </p>
+              <p>
+                <strong>Word-Level Sliding:</strong> Move in chunks of
+                word_length instead of character by character.
+              </p>
+            </div>
+          </div>
+
+          <div class="algorithm-flow">
+            <div class="flow-step">
+              <h4>Expand</h4>
+              <p>Add new word to window</p>
+            </div>
+            <div class="flow-step">
+              <h4>Check</h4>
+              <p>Validate word counts</p>
+            </div>
+            <div class="flow-step">
+              <h4>Shrink</h4>
+              <p>Remove excess words</p>
+            </div>
+            <div class="flow-step">
+              <h4>Record</h4>
+              <p>Save valid positions</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">⚙️ Algorithm Deep Dive</h2>
+
+          <div class="subsection">
+            <h3>The Multi-Offset Strategy</h3>
+            <p>
+              The genius of this approach:
+              <strong>We need to check every possible word alignment!</strong>
+            </p>
+
+            <div class="visual-example">
+              <h4>Example: s = "xbarfoo", words = ["bar", "foo"]</h4>
+              <div class="string-display">
+                <div class="positions-display">
+                  Offset 0: Positions 0, 3, 6...
+                </div>
+                <div>
+                  <span class="word-chunk invalid-word">xba</span>
+                  <span class="word-chunk invalid-word">rfo</span>
+                  <span class="word-chunk invalid-word">o</span>
+                </div>
+              </div>
+              <div class="string-display">
+                <div class="positions-display">
+                  Offset 1: Positions 1, 4, 7...
+                </div>
+                <div>
+                  x<span class="word-chunk valid-word">bar</span>
+                  <span class="word-chunk valid-word">foo</span>
+                  ← Found match!
+                </div>
+              </div>
+              <div class="string-display">
+                <div class="positions-display">
+                  Offset 2: Positions 2, 5, 8...
+                </div>
+                <div>
+                  xb<span class="word-chunk invalid-word">arf</span>
+                  <span class="word-chunk invalid-word">oo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Core Algorithm Components</h3>
+
+            <div class="step">
+              <div class="step-counter">1</div>
+              <div class="step-content">
+                <div class="step-title">Window State Tracking</div>
+                <div class="code-block">
+                  seen_words = {}
+                  <span class="comment"
+                    >// Frequency of words in current window</span
+                  >
+                  matched_words = 0
+                  <span class="comment"
+                    >// Count of correctly matched words</span
+                  >
+                  word_count = {}
+                  <span class="comment"
+                    >// Target frequency from words array</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">2</div>
+              <div class="step-content">
+                <div class="step-title">Expand Logic</div>
+                <div class="code-block">
+                  word = s[right:right + word_len]
+                  <span class="keyword">if</span> word
+                  <span class="keyword">in</span> word_count: seen_words[word]
+                  += 1 <span class="keyword">if</span> seen_words[word] <=
+                  word_count[word]: matched_words += 1
+                  <span class="keyword">else</span>:
+                  <span class="comment"
+                    >// Too many of this word - trigger shrink</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">3</div>
+              <div class="step-content">
+                <div class="step-title">Shrink Logic</div>
+                <div class="code-block">
+                  <span class="keyword">while</span> seen_words[word] >
+                  word_count[word]: left_word = s[left:left + word_len]
+                  seen_words[left_word] -= 1
+                  <span class="keyword">if</span> seen_words[left_word] <
+                  word_count[left_word]: matched_words -= 1 left += word_len
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">4</div>
+              <div class="step-content">
+                <div class="step-title">Answer Recording</div>
+                <div class="code-block">
+                  <span class="keyword">if</span> matched_words == total_words:
+                  result.append(left)
+                  <span class="comment"
+                    >// Move left to find next potential match</span
+                  >
+                  left_word = s[left:left + word_len] seen_words[left_word] -= 1
+                  matched_words -= 1 left += word_len
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📊 Complete Example Walkthrough</h2>
+
+          <div class="subsection">
+            <h3>Example: s = "barfoothefoobar", words = ["foo", "bar"]</h3>
+
+            <div class="visual-example">
+              <h4>String Breakdown</h4>
+              <div class="string-display">
+                <div class="positions-display">Position: 0 3 6 9 12</div>
+                <div>
+                  <span class="word-chunk valid-word">bar</span>
+                  <span class="word-chunk valid-word">foo</span>
+                  <span class="word-chunk invalid-word">the</span>
+                  <span class="word-chunk valid-word">foo</span>
+                  <span class="word-chunk valid-word">bar</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">1</div>
+              <div class="step-content">
+                <div class="step-title">Add "bar" at position 0</div>
+                <div class="string-display">
+                  <span class="word-chunk current-window">bar</span>
+                  <span class="word-chunk">foo</span>
+                  <span class="word-chunk">the</span>
+                  <span class="word-chunk">foo</span>
+                  <span class="word-chunk">bar</span>
+                </div>
+                <p>seen_words = {"bar": 1}, matched_words = 1</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">2</div>
+              <div class="step-content">
+                <div class="step-title">Add "foo" at position 3</div>
+                <div class="string-display">
+                  <span class="word-chunk found-match">bar</span>
+                  <span class="word-chunk found-match">foo</span>
+                  <span class="word-chunk">the</span>
+                  <span class="word-chunk">foo</span>
+                  <span class="word-chunk">bar</span>
+                </div>
+                <p>seen_words = {"bar": 1, "foo": 1}, matched_words = 2</p>
+                <p><strong>🎉 FOUND MATCH at position 0!</strong></p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">3</div>
+              <div class="step-content">
+                <div class="step-title">
+                  Move left pointer, add "the" at position 6
+                </div>
+                <div class="string-display">
+                  <span class="word-chunk">bar</span>
+                  <span class="word-chunk current-window">foo</span>
+                  <span class="word-chunk invalid-word">the</span>
+                  <span class="word-chunk">foo</span>
+                  <span class="word-chunk">bar</span>
+                </div>
+                <p>"the" not in word_count → RESET window</p>
+                <p>seen_words = {}, matched_words = 0, left = 9</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">4</div>
+              <div class="step-content">
+                <div class="step-title">Continue from position 9...</div>
+                <div class="string-display">
+                  <span class="word-chunk">bar</span>
+                  <span class="word-chunk">foo</span>
+                  <span class="word-chunk">the</span>
+                  <span class="word-chunk found-match">foo</span>
+                  <span class="word-chunk found-match">bar</span>
+                </div>
+                <p>
+                  Add "foo" → Add "bar" →
+                  <strong>🎉 FOUND MATCH at position 9!</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📈 Complexity Analysis</h2>
+
+          <table class="complexity-table">
+            <thead>
+              <tr>
+                <th>Approach</th>
+                <th>Time Complexity</th>
+                <th>Space Complexity</th>
+                <th>Explanation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Brute Force</td>
+                <td>O(n × m × k)</td>
+                <td>O(m)</td>
+                <td>Check every substring, verify permutation</td>
+              </tr>
+              <tr>
+                <td>Sliding Window</td>
+                <td>O(n × k)</td>
+                <td>O(m)</td>
+                <td>Each character visited at most twice</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="highlight-box">
+            <h4>Why O(n × k) Time?</h4>
+            <ul>
+              <li><strong>n</strong> = length of string s</li>
+              <li><strong>k</strong> = length of each word</li>
+              <li><strong>m</strong> = number of words</li>
+              <li>We check k different offsets</li>
+              <li>
+                For each offset, each character is processed at most twice
+                (expand + shrink)
+              </li>
+              <li>Total: k × 2n = O(n × k)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">💡 Pro Tips & Tricks</h2>
+
+          <div class="tip-box">
+            <h4>Pattern Recognition</h4>
+            <p>
+              Use sliding window when you need to find contiguous
+              subarrays/substrings with specific properties. The key indicators
+              are:
+            </p>
+            <ul>
+              <li>Looking for substrings/subarrays that satisfy constraints</li>
+              <li>Need to optimize from O(n²) brute force</li>
+              <li>Can expand/shrink window based on current state</li>
+              <li>Window size can be fixed or variable</li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>Implementation Tips</h4>
+            <ul>
+              <li>
+                <strong>Use hashmaps for O(1) lookups:</strong> Track
+                frequencies efficiently
+              </li>
+              <li>
+                <strong>Define clear expand/shrink rules:</strong> When to
+                grow/contract the window
+              </li>
+              <li>
+                <strong>Handle edge cases:</strong> Empty strings, single
+                elements, no matches
+              </li>
+              <li>
+                <strong>Be consistent with bounds:</strong> Inclusive vs
+                exclusive indices
+              </li>
+              <li>
+                <strong>Reset wisely:</strong> When invalid elements make
+                progress impossible
+              </li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>Debugging Strategies</h4>
+            <ul>
+              <li>
+                <strong>Trace small examples by hand:</strong> Understand the
+                window movement
+              </li>
+              <li>
+                <strong>Print window state:</strong> left, right, current
+                counts, matched count
+              </li>
+              <li>
+                <strong>Verify invariants:</strong> Window always contains valid
+                subset
+              </li>
+              <li>
+                <strong>Test edge cases:</strong> No matches, all matches,
+                single word
+              </li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>Common Pitfalls to Avoid</h4>
+            <ul>
+              <li>
+                <strong>Off-by-one errors:</strong> Double-check array bounds
+                and increments
+              </li>
+              <li>
+                <strong>Forgetting to reset:</strong> Clear state when starting
+                fresh
+              </li>
+              <li>
+                <strong>Wrong shrink condition:</strong> Make sure to decrement
+                matched_words correctly
+              </li>
+              <li>
+                <strong>Missing offsets:</strong> Remember to check all possible
+                word alignments
+              </li>
+              <li>
+                <strong>Infinite loops:</strong> Ensure left pointer always
+                advances
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🎯 When to Use Sliding Window</h2>
+
+          <div class="subsection">
+            <h3>Perfect Candidates</h3>
+            <ul>
+              <li>
+                <strong>Contiguous subarray problems:</strong> Max sum, min
+                length, specific sum
+              </li>
+              <li>
+                <strong>String matching:</strong> Anagrams, permutations,
+                pattern matching
+              </li>
+              <li>
+                <strong>Fixed/variable window size:</strong> K-sized windows or
+                constraint-based
+              </li>
+              <li>
+                <strong>Two pointers scenarios:</strong> When you can
+                expand/contract efficiently
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>Alternative Patterns to Consider</h3>
+            <ul>
+              <li>
+                <strong>Two Pointers:</strong> For sorted arrays or opposite
+                direction movement
+              </li>
+              <li>
+                <strong>Hash Table:</strong> For non-contiguous element tracking
+              </li>
+              <li>
+                <strong>Dynamic Programming:</strong> For overlapping
+                subproblems
+              </li>
+              <li>
+                <strong>Binary Search:</strong> For sorted data or search space
+                reduction
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🚀 Final Code Implementation</h2>
+
+          <div class="code-block">
+            <span class="keyword">def</span> findSubstring(s, words):
+            <span class="keyword">if</span> <span class="keyword">not</span> s
+            <span class="keyword">or</span>
+            <span class="keyword">not</span> words
+            <span class="keyword">or</span>
+            <span class="keyword">not</span> words[0]:
+            <span class="keyword">return</span> [] word_len = len(words[0])
+            total_words = len(words) total_len = word_len * total_words
+
+            <span class="keyword">if</span> len(s) < total_len:
+            <span class="keyword">return</span> []
+
+            <span class="comment"># Build target word frequency map</span>
+            <span class="keyword">from</span> collections
+            <span class="keyword">import</span> defaultdict word_count =
+            defaultdict(int) <span class="keyword">for</span> word
+            <span class="keyword">in</span> words: word_count[word] += 1 result
+            = []
+
+            <span class="comment"># Check each possible offset</span>
+            <span class="keyword">for</span> offset
+            <span class="keyword">in</span> range(word_len): left = offset
+            seen_words = defaultdict(int) matched_words = 0
+
+            <span class="comment"># Sliding window for this offset</span>
+            <span class="keyword">for</span> right
+            <span class="keyword">in</span> range(offset, len(s) - word_len + 1,
+            word_len): word = s[right:right + word_len]
+
+            <span class="keyword">if</span> word
+            <span class="keyword">in</span> word_count:
+            <span class="comment"># Expand window</span>
+            seen_words[word] += 1
+
+            <span class="keyword">if</span> seen_words[word] <=
+            word_count[word]: matched_words += 1
+            <span class="keyword">else</span>:
+            <span class="comment"># Shrink window</span>
+            <span class="keyword">while</span> seen_words[word] >
+            word_count[word]: left_word = s[left:left + word_len]
+            seen_words[left_word] -= 1
+            <span class="keyword">if</span> seen_words[left_word] <
+            word_count[left_word]: matched_words -= 1 left += word_len
+
+            <span class="comment"># Check for valid concatenation</span>
+            <span class="keyword">if</span> matched_words == total_words:
+            result.append(left)
+            <span class="comment"># Move left to find next match</span>
+            left_word = s[left:left + word_len] seen_words[left_word] -= 1
+            matched_words -= 1 left += word_len
+            <span class="keyword">else</span>:
+            <span class="comment"># Reset window</span>
+            seen_words.clear() matched_words = 0 left = right + word_len
+
+            <span class="keyword">return</span> result
+          </div>
+
+          <div class="highlight-box">
+            <h4>Key Takeaways</h4>
+            <ul>
+              <li>
+                <strong>Multiple offsets:</strong> Essential for finding all
+                possible alignments
+              </li>
+              <li>
+                <strong>Word-level sliding:</strong> Move in word_length chunks,
+                not character by character
+              </li>
+              <li>
+                <strong>Efficient tracking:</strong> Use hashmaps for O(1)
+                frequency updates
+              </li>
+              <li>
+                <strong>Smart shrinking:</strong> Remove excess words from left
+                when constraints violated
+              </li>
+              <li>
+                <strong>Reset optimization:</strong> Clear window when
+                impossible words encountered
+              </li>
+              <li>
+                <strong>Continuous search:</strong> After finding match,
+                immediately look for next one
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🧪 Additional Examples & Edge Cases</h2>
+
+          <div class="subsection">
+            <h3>Example 2: Duplicate Words</h3>
+            <div class="visual-example">
+              <h4>s = "barfoobar", words = ["bar", "foo", "bar"]</h4>
+              <p>
+                <strong>Challenge:</strong> Handle repeated words in the target
+                list
+              </p>
+              <div class="string-display">
+                <div class="positions-display">
+                  Target: {"bar": 2, "foo": 1}
+                </div>
+                <div>
+                  <span class="word-chunk valid-word">bar</span>
+                  <span class="word-chunk valid-word">foo</span>
+                  <span class="word-chunk valid-word">bar</span>
+                </div>
+              </div>
+              <p>
+                <strong>Result:</strong> [0] - The entire string is a valid
+                concatenation!
+              </p>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Example 3: No Matches</h3>
+            <div class="visual-example">
+              <h4>
+                s = "wordgoodgoodgoodbestword", words = ["word", "good", "best",
+                "word"]
+              </h4>
+              <p>
+                <strong>Challenge:</strong> All required words present but not
+                in valid concatenation
+              </p>
+              <div class="string-display">
+                <div class="positions-display">
+                  Target: {"word": 2, "good": 1, "best": 1}
+                </div>
+                <div>
+                  <span class="word-chunk valid-word">word</span>
+                  <span class="word-chunk valid-word">good</span>
+                  <span class="word-chunk valid-word">good</span>
+                  <span class="word-chunk valid-word">good</span>
+                  <span class="word-chunk valid-word">best</span>
+                  <span class="word-chunk valid-word">word</span>
+                </div>
+              </div>
+              <p>
+                <strong>Issue:</strong> Too many "good" words, not enough "word"
+                words in any 4-word window
+              </p>
+              <p><strong>Result:</strong> [] - No valid concatenations found</p>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Edge Cases to Consider</h3>
+            <div class="tip-box">
+              <h4>Input Validation</h4>
+              <ul>
+                <li><strong>Empty string:</strong> s = "" → return []</li>
+                <li>
+                  <strong>Empty words array:</strong> words = [] → return []
+                </li>
+                <li>
+                  <strong>String too short:</strong> len(s) < total_length →
+                  return []
+                </li>
+                <li>
+                  <strong>Single word:</strong> words = ["abc"] → check for
+                  exact matches
+                </li>
+              </ul>
+            </div>
+
+            <div class="tip-box">
+              <h4>Boundary Conditions</h4>
+              <ul>
+                <li>
+                  <strong>Exact length match:</strong> s length equals total
+                  words length
+                </li>
+                <li>
+                  <strong>Single character words:</strong> word_length = 1
+                </li>
+                <li>
+                  <strong>Maximum constraints:</strong> Large inputs within
+                  problem limits
+                </li>
+                <li>
+                  <strong>All same words:</strong> words = ["abc", "abc", "abc"]
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🔧 Optimization Techniques</h2>
+
+          <div class="subsection">
+            <h3>Early Termination Optimizations</h3>
+            <div class="code-block">
+              <span class="comment"># 1. Skip impossible positions</span>
+              <span class="keyword">if</span> len(s) - right < (total_words -
+              matched_words) * word_len: <span class="keyword">break</span>
+              <span class="comment"
+                ># Not enough chars left for remaining words</span
+              >
+
+              <span class="comment"># 2. Fast word validation</span>
+              <span class="keyword">if</span> word
+              <span class="keyword">not</span>
+              <span class="keyword">in</span> word_count:
+              <span class="comment"
+                ># Skip to next potential starting position</span
+              >
+              left = right + word_len
+              <span class="keyword">continue</span>
+
+              <span class="comment"
+                ># 3. Precompute word sets for faster lookup</span
+              >
+              valid_words = set(words)
+              <span class="keyword">if</span> word
+              <span class="keyword">not</span>
+              <span class="keyword">in</span> valid_words:
+              <span class="comment"
+                ># O(1) lookup instead of dictionary access</span
+              >
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Memory Optimizations</h3>
+            <div class="code-block">
+              <span class="comment"># 1. Reuse frequency maps</span>
+              seen_words.clear()
+              <span class="comment"># Instead of creating new dict</span>
+
+              <span class="comment"
+                ># 2. Use arrays for small character sets</span
+              >
+              <span class="keyword">if</span> all_lowercase_letters: counts =
+              [0] * 26 <span class="comment"># Instead of hashmap</span>
+
+              <span class="comment"># 3. String slicing optimization</span>
+              <span class="comment"
+                ># Consider using start/end indices instead of creating
+                substrings</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🎓 Related Problems & Variations</h2>
+
+          <div class="subsection">
+            <h3>Similar Sliding Window Problems</h3>
+            <ul>
+              <li>
+                <strong>Minimum Window Substring:</strong> Find smallest window
+                containing all characters
+              </li>
+              <li>
+                <strong>Longest Substring Without Repeating Characters:</strong>
+                Variable size window
+              </li>
+              <li>
+                <strong>Find All Anagrams in a String:</strong> Fixed size
+                window with permutation check
+              </li>
+              <li>
+                <strong>Sliding Window Maximum:</strong> Maintain max in K-sized
+                window
+              </li>
+              <li>
+                <strong>Permutation in String:</strong> Check if permutation
+                exists as substring
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>Pattern Variations</h3>
+            <div class="algorithm-flow">
+              <div class="flow-step">
+                <h4>Fixed Window</h4>
+                <p>Size k problems</p>
+              </div>
+              <div class="flow-step">
+                <h4>Variable Window</h4>
+                <p>Constraint-based sizing</p>
+              </div>
+              <div class="flow-step">
+                <h4>Multiple Windows</h4>
+                <p>Track several ranges</p>
+              </div>
+              <div class="flow-step">
+                <h4>Nested Windows</h4>
+                <p>Window within window</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📝 Interview Preparation Checklist</h2>
+
+          <div class="tip-box">
+            <h4>Before Coding</h4>
+            <ul>
+              <li>
+                ✅ Understand the problem completely - ask clarifying questions
+              </li>
+              <li>✅ Identify if sliding window is the right pattern</li>
+              <li>✅ Determine window size (fixed vs variable)</li>
+              <li>✅ Define expand and shrink conditions clearly</li>
+              <li>✅ Consider edge cases and constraints</li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>During Implementation</h4>
+            <ul>
+              <li>✅ Start with brute force to establish correctness</li>
+              <li>✅ Implement sliding window step by step</li>
+              <li>✅ Test with small examples while coding</li>
+              <li>✅ Handle edge cases explicitly</li>
+              <li>✅ Verify time and space complexity</li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>After Coding</h4>
+            <ul>
+              <li>✅ Trace through examples manually</li>
+              <li>✅ Test edge cases thoroughly</li>
+              <li>✅ Analyze complexity and explain trade-offs</li>
+              <li>✅ Discuss potential optimizations</li>
+              <li>✅ Consider alternative approaches</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🏆 Mastery Summary</h2>
+
+          <div class="highlight-box">
+            <h4>You've Mastered Sliding Window When You Can:</h4>
+            <ul>
+              <li>
+                <strong>Recognize the pattern:</strong> Identify when sliding
+                window is optimal
+              </li>
+              <li>
+                <strong>Design the window:</strong> Define clear expand/shrink
+                rules
+              </li>
+              <li>
+                <strong>Handle edge cases:</strong> Empty inputs, no matches,
+                boundary conditions
+              </li>
+              <li>
+                <strong>Optimize efficiently:</strong> Achieve O(n) or O(n log
+                n) from O(n²)
+              </li>
+              <li>
+                <strong>Debug effectively:</strong> Trace window state and
+                movement
+              </li>
+              <li>
+                <strong>Explain complexity:</strong> Justify why algorithm is
+                efficient
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>The Sliding Window Mindset</h3>
+            <p>
+              <strong>Think of it as:</strong> A "smart scanner" that
+              efficiently examines all possible subarrays without redundant
+              work. Instead of checking every possible range from scratch, we
+              incrementally update our knowledge as we slide through the data.
+            </p>
+
+            <p>
+              <strong>Key insight:</strong> Most problems involving contiguous
+              subarrays can be optimized using this pattern. The trick is
+              identifying the right expand/shrink conditions and maintaining the
+              correct invariants.
+            </p>
+          </div>
+
+          <div class="visual-example">
+            <h4>Final Thought</h4>
+            <p
+              style="
+                font-style: italic;
+                text-align: center;
+                font-size: 1.1em;
+                color: #2d3748;
+              "
+            >
+              "Sliding window is not just an algorithm - it's a way of thinking
+              about optimization. Once you master this pattern, you'll see
+              opportunities to apply it everywhere!"
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style="text-align: center; color: white; margin-top: 20px; opacity: 0.8"
+      >
+        <p>🎯 Master the pattern, ace the interview! 🚀</p>
+      </div>
+    </div>
+  </body>
+</html>
