@@ -497,5 +497,3 @@ When creating a new algorithm explanation page:
 - **Graph Algorithms**: Blue gradient (`#3b82f6` to `#1d4ed8`)  
 - **Tree Algorithms**: Purple gradient (`#8b5cf6` to `#7c3aed`)
 - **Array/String**: Orange gradient (`#f59e0b` to `#d97706`)
-
-This style guide ensures consistent, professional, and visually appealing algorithm explanation pages that effectively combine education with modern web design aesthetics.
