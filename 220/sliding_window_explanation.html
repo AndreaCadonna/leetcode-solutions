@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sliding Window + Ordered Structure: Visual Guide</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.2em;
+        opacity: 0.9;
+      }
+
+      .content-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        margin-bottom: 30px;
+      }
+
+      .section {
+        padding: 30px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .section:last-child {
+        border-bottom: none;
+      }
+
+      .section-title {
+        font-size: 1.8em;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::before {
+        content: "";
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 2px;
+      }
+
+      .subsection {
+        margin: 25px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+      }
+
+      .subsection h3 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+      }
+
+      .code-block {
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        overflow-x: auto;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        white-space: pre;
+        line-height: 1.5;
+        tab-size: 4;
+      }
+
+      .code-block .comment {
+        color: #68d391;
+      }
+      .code-block .keyword {
+        color: #f093fb;
+      }
+      .code-block .string {
+        color: #fbb6ce;
+      }
+
+      .visual-example {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .array-display {
+        font-family: "Courier New", monospace;
+        font-size: 16px;
+        margin: 15px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .array-element {
+        display: inline-block;
+        padding: 12px 16px;
+        margin: 3px;
+        border: 2px solid #cbd5e0;
+        border-radius: 8px;
+        background: #f7fafc;
+        min-width: 60px;
+        text-align: center;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .array-element:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .array-element .index {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        background: #667eea;
+        color: white;
+        border-radius: 10px;
+        padding: 2px 6px;
+      }
+
+      .in-window {
+        background: #bee3f8;
+        border-color: #3182ce;
+        color: #2a4365;
+        border-width: 3px;
+      }
+
+      .current-element {
+        background: #c6f6d5;
+        border-color: #38a169;
+        color: #22543d;
+        border-width: 3px;
+        box-shadow: 0 0 15px rgba(56, 161, 105, 0.4);
+      }
+
+      .found-match {
+        background: #fed7d7;
+        border-color: #e53e3e;
+        color: #742a2a;
+        border-width: 3px;
+        box-shadow: 0 0 15px rgba(229, 62, 62, 0.4);
+      }
+
+      .removed-element {
+        background: #f7fafc;
+        border-color: #cbd5e0;
+        color: #a0aec0;
+        opacity: 0.5;
+      }
+
+      .step {
+        display: flex;
+        align-items: flex-start;
+        margin: 20px 0;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .step-counter {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 20px;
+        flex-shrink: 0;
+        font-size: 16px;
+      }
+
+      .step-content {
+        flex: 1;
+      }
+
+      .step-title {
+        font-size: 1.2em;
+        color: #2c3e50;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .window-state {
+        background: #e6fffa;
+        border: 1px solid #38b2ac;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        font-family: "Courier New", monospace;
+      }
+
+      .window-state h4 {
+        color: #234e52;
+        margin-bottom: 10px;
+        font-family: "Segoe UI", sans-serif;
+      }
+
+      .sorted-set {
+        display: flex;
+        gap: 8px;
+        margin: 10px 0;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .sorted-element {
+        background: #e6fffa;
+        border: 2px solid #38b2ac;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-weight: bold;
+        color: #234e52;
+      }
+
+      .sorted-element.highlight {
+        background: #fed7d7;
+        border-color: #e53e3e;
+        color: #742a2a;
+      }
+
+      .binary-search-demo {
+        background: #f0f4f8;
+        border: 2px solid #4a90e2;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .binary-search-demo h4 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+      }
+
+      .search-visualization {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 15px 0;
+        font-family: "Courier New", monospace;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .search-element {
+        padding: 8px 12px;
+        border: 2px solid #cbd5e0;
+        border-radius: 6px;
+        background: #f7fafc;
+        min-width: 35px;
+        text-align: center;
+      }
+
+      .search-element.target {
+        background: #fef5e7;
+        border-color: #f59e0b;
+        color: #92400e;
+      }
+
+      .search-element.found {
+        background: #c6f6d5;
+        border-color: #38a169;
+        color: #22543d;
+      }
+
+      .search-pointer {
+        color: #e53e3e;
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+
+      .range-display {
+        background: #fffbeb;
+        border: 2px solid #f59e0b;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        font-family: "Courier New", monospace;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      .match-result {
+        background: #c6f6d5;
+        border: 2px solid #38a169;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        text-align: center;
+        font-weight: bold;
+        color: #22543d;
+      }
+
+      .no-match-result {
+        background: #fed7d7;
+        border: 2px solid #e53e3e;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        text-align: center;
+        font-weight: bold;
+        color: #742a2a;
+      }
+
+      .highlight-box {
+        background: linear-gradient(135deg, #667eea10, #764ba210);
+        border: 1px solid #667eea;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .tip-box {
+        background: #fffbeb;
+        border: 1px solid #f59e0b;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        border-left: 4px solid #f59e0b;
+      }
+
+      .tip-box h4 {
+        color: #92400e;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .tip-box h4::before {
+        content: "💡";
+      }
+
+      .problem-statement {
+        background: #e6fffa;
+        border: 1px solid #38b2ac;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .problem-statement h3 {
+        color: #234e52;
+        margin-bottom: 15px;
+      }
+
+      .complexity-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+
+      .complexity-table th,
+      .complexity-table td {
+        border: 1px solid #e2e8f0;
+        padding: 12px;
+        text-align: left;
+      }
+
+      .complexity-table th {
+        background: #f7fafc;
+        font-weight: bold;
+        color: #2d3748;
+      }
+
+      .complexity-table tr:nth-child(even) {
+        background: #f9f9f9;
+      }
+
+      .algorithm-flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .flow-step {
+        flex: 1;
+        min-width: 200px;
+        padding: 15px;
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        text-align: center;
+        position: relative;
+      }
+
+      .flow-step::after {
+        content: "→";
+        position: absolute;
+        right: -25px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+        color: #667eea;
+        font-weight: bold;
+      }
+
+      .flow-step:last-child::after {
+        display: none;
+      }
+
+      .window-visualization {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 25px;
+        margin: 20px 0;
+      }
+
+      .window-box {
+        border: 3px dashed #667eea;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 15px 0;
+        background: #f0f4f8;
+        position: relative;
+      }
+
+      .window-label {
+        position: absolute;
+        top: -12px;
+        left: 10px;
+        background: #667eea;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
+        }
+        .header h1 {
+          font-size: 2em;
+        }
+        .algorithm-flow {
+          flex-direction: column;
+        }
+        .flow-step::after {
+          display: none;
+        }
+        .array-display {
+          justify-content: center;
+        }
+        .search-visualization {
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎯 Sliding Window + Ordered Structure</h1>
+        <p>Visual Pattern Guide for Proximity Problems</p>
+      </div>
+
+      <div class="content-card">
+        <div class="section">
+          <h2 class="section-title">🎯 Problem Understanding</h2>
+
+          <div class="problem-statement">
+            <h3>LeetCode Problem: Contains Duplicate III</h3>
+            <p>
+              <strong>Given:</strong> Integer array <code>nums</code>, integers
+              <code>indexDiff</code> and <code>valueDiff</code>
+            </p>
+            <p>
+              <strong>Find:</strong> If there exists pair of indices
+              <code>(i, j)</code> such that:
+            </p>
+            <ul style="margin: 10px 0 10px 30px">
+              <li><code>i != j</code> (different indices)</li>
+              <li><code>abs(i - j) <= indexDiff</code> (close indices)</li>
+              <li>
+                <code>abs(nums[i] - nums[j]) <= valueDiff</code> (close values)
+              </li>
+            </ul>
+          </div>
+
+          <div class="visual-example">
+            <h4>Example Input:</h4>
+            <div class="array-display">
+              <div class="array-element">
+                <div class="index">0</div>
+                1
+              </div>
+              <div class="array-element">
+                <div class="index">1</div>
+                2
+              </div>
+              <div class="array-element">
+                <div class="index">2</div>
+                3
+              </div>
+              <div class="array-element">
+                <div class="index">3</div>
+                1
+              </div>
+            </div>
+            <p><strong>indexDiff = 3, valueDiff = 0</strong></p>
+            <p>
+              <strong>Answer:</strong> True (indices 0,3 satisfy both
+              constraints)
+            </p>
+          </div>
+
+          <div class="highlight-box">
+            <p>
+              <strong>Challenge:</strong> We need elements that are both
+              spatially close (index-wise) and value-wise close. A brute force
+              O(n²) approach checking all pairs is too slow for large inputs.
+            </p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">
+            🔍 Why Sliding Window + Ordered Structure?
+          </h2>
+
+          <div class="subsection">
+            <h3>The Core Insight</h3>
+            <p>Instead of checking all pairs, we can:</p>
+            <ol style="margin: 15px 0 15px 30px">
+              <li>
+                <strong>Sliding Window:</strong> Maintain elements within
+                <code>indexDiff</code> distance
+              </li>
+              <li>
+                <strong>Ordered Structure:</strong> Quickly find values within
+                <code>valueDiff</code> range
+              </li>
+              <li>
+                <strong>Binary Search:</strong> Use range queries to find
+                candidates efficiently
+              </li>
+            </ol>
+          </div>
+
+          <div class="window-visualization">
+            <h4>Sliding Window Concept:</h4>
+            <div class="window-box">
+              <div class="window-label">Window (size ≤ indexDiff + 1)</div>
+              <div class="array-display">
+                <div class="array-element in-window">
+                  <div class="index">i-2</div>
+                  2
+                </div>
+                <div class="array-element in-window">
+                  <div class="index">i-1</div>
+                  1
+                </div>
+                <div class="array-element in-window">
+                  <div class="index">i</div>
+                  4
+                </div>
+                <div class="array-element current-element">
+                  <div class="index">i+1</div>
+                  ?
+                </div>
+              </div>
+            </div>
+            <p>
+              <strong>For current element:</strong> Query "Any value in window
+              within ±valueDiff range?"
+            </p>
+          </div>
+
+          <div class="algorithm-flow">
+            <div class="flow-step">
+              <strong>Maintain Window</strong><br />
+              Size ≤ indexDiff + 1
+            </div>
+            <div class="flow-step">
+              <strong>Binary Search</strong><br />
+              Find range candidates
+            </div>
+            <div class="flow-step">
+              <strong>Check Match</strong><br />
+              Verify distance ≤ valueDiff
+            </div>
+            <div class="flow-step">
+              <strong>Early Exit</strong><br />
+              Return true if found
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">⚙️ Algorithm Deep Dive</h2>
+
+          <div class="subsection">
+            <h3>Core Data Structures</h3>
+            <div class="code-block">
+              from sortedcontainers import SortedSet # Sliding window to
+              maintain elements within indexDiff range window = SortedSet() #
+              For each element: # 1. Remove elements outside window (too far) #
+              2. Use binary search to find range candidates # 3. Check if any
+              candidate is within valueDiff # 4. Add current element to window
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Range Query Logic</h3>
+            <p>
+              For current element <code>num</code>, we need to find any
+              <code>x</code> in window such that:
+            </p>
+            <div class="range-display">
+              abs(num - x) ≤ valueDiff<br />
+              ⟺ x ∈ [num - valueDiff, num + valueDiff]
+            </div>
+            <p>
+              Using <code>bisect_left(num - valueDiff)</code> to efficiently
+              find the first candidate!
+            </p>
+          </div>
+
+          <div class="binary-search-demo">
+            <h4>Binary Search Strategy:</h4>
+            <div class="search-visualization">
+              <span>Window: [</span>
+              <span class="search-element">1</span>
+              <span class="search-element">3</span>
+              <span class="search-element found">5</span>
+              <span class="search-element">7</span>
+              <span class="search-element">9</span>
+              <span>]</span>
+            </div>
+            <p>
+              <strong>Query:</strong> Find elements in range [4, 8] for num=6,
+              valueDiff=2
+            </p>
+            <div class="search-visualization">
+              <span class="search-pointer">↑</span>
+              <span style="margin-left: 40px">bisect_left(4) → position 2</span>
+            </div>
+            <p>
+              <strong>Check:</strong> window[2] = 5, is 5 ≤ 8? YES! Match found
+              ✅
+            </p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📊 Complete Example Walkthrough</h2>
+
+          <div class="subsection">
+            <h3>Example: nums = [1,2,3,1], indexDiff = 3, valueDiff = 0</h3>
+
+            <div class="step">
+              <div class="step-counter">1</div>
+              <div class="step-content">
+                <div class="step-title">Process index 0: num = 1</div>
+                <div class="array-display">
+                  <div class="array-element current-element">
+                    <div class="index">0</div>
+                    1
+                  </div>
+                  <div class="array-element">
+                    <div class="index">1</div>
+                    2
+                  </div>
+                  <div class="array-element">
+                    <div class="index">2</div>
+                    3
+                  </div>
+                  <div class="array-element">
+                    <div class="index">3</div>
+                    1
+                  </div>
+                </div>
+                <div class="window-state">
+                  <h4>Window State:</h4>
+                  <p>
+                    Remove elements beyond index 0 - 3 - 1 = -4: None to remove
+                  </p>
+                  <p>
+                    Current window (SortedSet):
+                    <span class="sorted-set"></span> (empty)
+                  </p>
+                  <p>Range to check: [1 - 0, 1 + 0] = [1, 1]</p>
+                  <p>
+                    <strong>Binary Search:</strong> bisect_left(1) in [] →
+                    position 0
+                  </p>
+                  <p><strong>Result:</strong> No elements in window to check</p>
+                </div>
+                <p>
+                  <strong>Action:</strong> Add 1 to window → Window becomes: [1]
+                </p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">2</div>
+              <div class="step-content">
+                <div class="step-title">Process index 1: num = 2</div>
+                <div class="array-display">
+                  <div class="array-element in-window">
+                    <div class="index">0</div>
+                    1
+                  </div>
+                  <div class="array-element current-element">
+                    <div class="index">1</div>
+                    2
+                  </div>
+                  <div class="array-element">
+                    <div class="index">2</div>
+                    3
+                  </div>
+                  <div class="array-element">
+                    <div class="index">3</div>
+                    1
+                  </div>
+                </div>
+                <div class="window-state">
+                  <h4>Window State:</h4>
+                  <p>
+                    Remove elements beyond index 1 - 3 - 1 = -3: None to remove
+                  </p>
+                  <p>
+                    Current window (SortedSet):
+                    <span class="sorted-set"
+                      ><span class="sorted-element">1</span></span
+                    >
+                  </p>
+                  <p>Range to check: [2 - 0, 2 + 0] = [2, 2]</p>
+                  <p>
+                    <strong>Binary Search:</strong> bisect_left(2) in [1] →
+                    position 1
+                  </p>
+                  <p>
+                    <strong>Check:</strong> No element at position 1, so no
+                    match
+                  </p>
+                </div>
+                <p>
+                  <strong>Action:</strong> Add 2 to window → Window becomes: [1,
+                  2]
+                </p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">3</div>
+              <div class="step-content">
+                <div class="step-title">Process index 2: num = 3</div>
+                <div class="array-display">
+                  <div class="array-element in-window">
+                    <div class="index">0</div>
+                    1
+                  </div>
+                  <div class="array-element in-window">
+                    <div class="index">1</div>
+                    2
+                  </div>
+                  <div class="array-element current-element">
+                    <div class="index">2</div>
+                    3
+                  </div>
+                  <div class="array-element">
+                    <div class="index">3</div>
+                    1
+                  </div>
+                </div>
+                <div class="window-state">
+                  <h4>Window State:</h4>
+                  <p>
+                    Remove elements beyond index 2 - 3 - 1 = -2: None to remove
+                  </p>
+                  <p>
+                    Current window (SortedSet):
+                    <span class="sorted-set"
+                      ><span class="sorted-element">1</span
+                      ><span class="sorted-element">2</span></span
+                    >
+                  </p>
+                  <p>Range to check: [3 - 0, 3 + 0] = [3, 3]</p>
+                  <p>
+                    <strong>Binary Search:</strong> bisect_left(3) in [1, 2] →
+                    position 2
+                  </p>
+                  <p>
+                    <strong>Check:</strong> No element at position 2, so no
+                    match
+                  </p>
+                </div>
+                <p>
+                  <strong>Action:</strong> Add 3 to window → Window becomes: [1,
+                  2, 3]
+                </p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">4</div>
+              <div class="step-content">
+                <div class="step-title">Process index 3: num = 1 🎉</div>
+                <div class="array-display">
+                  <div class="array-element found-match">
+                    <div class="index">0</div>
+                    1
+                  </div>
+                  <div class="array-element in-window">
+                    <div class="index">1</div>
+                    2
+                  </div>
+                  <div class="array-element in-window">
+                    <div class="index">2</div>
+                    3
+                  </div>
+                  <div class="array-element found-match">
+                    <div class="index">3</div>
+                    1
+                  </div>
+                </div>
+                <div class="window-state">
+                  <h4>Window State:</h4>
+                  <p>
+                    Remove elements beyond index 3 - 3 - 1 = -1: None to remove
+                  </p>
+                  <p>
+                    Current window (SortedSet):
+                    <span class="sorted-set"
+                      ><span class="sorted-element highlight">1</span
+                      ><span class="sorted-element">2</span
+                      ><span class="sorted-element">3</span></span
+                    >
+                  </p>
+                  <p>Range to check: [1 - 0, 1 + 0] = [1, 1]</p>
+                  <p>
+                    <strong>Binary Search:</strong> bisect_left(1) in [1, 2, 3]
+                    → position 0
+                  </p>
+                  <p><strong>Check:</strong> window[0] = 1, and 1 ≤ 1 + 0 ✅</p>
+                </div>
+                <div class="match-result">
+                  🎉 FOUND MATCH! Indices (0,3): abs(0-3)=3≤3, abs(1-1)=0≤0
+                </div>
+                <p><strong style="color: #e53e3e">Return True</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📈 Complexity Analysis</h2>
+
+          <table class="complexity-table">
+            <thead>
+              <tr>
+                <th>Operation</th>
+                <th>Time Complexity</th>
+                <th>Explanation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Window Maintenance</td>
+                <td>O(log k)</td>
+                <td>Remove element from SortedSet</td>
+              </tr>
+              <tr>
+                <td>Range Query</td>
+                <td>O(log k)</td>
+                <td>Binary search in SortedSet</td>
+              </tr>
+              <tr>
+                <td>Insert Element</td>
+                <td>O(log k)</td>
+                <td>Add element to SortedSet</td>
+              </tr>
+              <tr style="background: #c6f6d5">
+                <td><strong>Overall</strong></td>
+                <td><strong>O(n log k)</strong></td>
+                <td><strong>n elements × O(log k) operations</strong></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="highlight-box">
+            <p>
+              <strong>Where k = min(indexDiff + 1, n)</strong> (window size)
+            </p>
+            <p><strong>Space Complexity:</strong> O(k) for the SortedSet</p>
+            <p>
+              <strong>Why efficient:</strong> k is often much smaller than n,
+              making log k very small
+            </p>
+          </div>
+
+          <div class="tip-box">
+            <h4>Performance Comparison</h4>
+            <p>
+              <strong>Brute Force:</strong> O(n × indexDiff) - checks all pairs
+              within range
+            </p>
+            <p>
+              <strong>This Approach:</strong> O(n log indexDiff) - uses binary
+              search optimization
+            </p>
+            <p>
+              <strong>Improvement:</strong> For indexDiff=1000, reduces ~1000
+              operations per element to ~10
+            </p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">💡 Pro Tips & Tricks</h2>
+
+          <div class="subsection">
+            <h3>💡 Pattern Recognition Signals</h3>
+            <ul style="margin-left: 30px">
+              <li>
+                <strong>"Close indices" + "close values"</strong> → Sliding
+                Window + Ordered Structure
+              </li>
+              <li>
+                <strong>"Within distance/range"</strong> → Consider range
+                queries
+              </li>
+              <li>
+                <strong>"Find if exists"</strong> → Early termination
+                optimization
+              </li>
+              <li>
+                <strong>Large arrays with proximity constraints</strong> → Avoid
+                O(n²) approaches
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>💡 Implementation Mastery</h3>
+            <ul style="margin-left: 30px">
+              <li>
+                <strong>Window maintenance:</strong> Remove elements at index
+                <code>i - indexDiff - 1</code>
+              </li>
+              <li>
+                <strong>Binary search usage:</strong>
+                <code>bisect_left</code> finds first candidate efficiently
+              </li>
+              <li>
+                <strong>Range checking:</strong> Verify candidate is ≤
+                <code>num + valueDiff</code>
+              </li>
+              <li>
+                <strong>Add after check:</strong> Add current element to window
+                after searching
+              </li>
+            </ul>
+          </div>
+
+          <div class="binary-search-demo">
+            <h4>SortedSet Operations (All O(log k)):</h4>
+            <div class="code-block">
+              window.add(x)
+              <span class="comment"># Insert maintaining order</span>
+              window.remove(x)
+              <span class="comment"># Remove specific element</span>
+              window.bisect_left(x)
+              <span class="comment"># Find insertion position</span> len(window)
+              <span class="comment"># Get current size - O(1)</span> window[i]
+              <span class="comment"># Access by index - O(1)</span>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>💡 Alternative Data Structures</h3>
+            <div class="visual-example">
+              <p>
+                <strong>Python:</strong>
+                <code>sortedcontainers.SortedSet</code> (recommended)
+              </p>
+              <p>
+                <strong>C++:</strong> <code>std::multiset</code> or
+                <code>std::set</code>
+              </p>
+              <p>
+                <strong>Java:</strong> <code>TreeSet</code> (careful with
+                duplicates)
+              </p>
+              <p>
+                <strong>Manual:</strong> Maintain sorted list with binary search
+                (O(k) insertions)
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🧪 Edge Cases & Additional Examples</h2>
+
+          <div class="subsection">
+            <h3>Example 2: Larger Value Range</h3>
+            <div class="visual-example">
+              <p>
+                <strong>Input:</strong> nums = [1,5,9,1,5,9], indexDiff = 2,
+                valueDiff = 3
+              </p>
+              <div class="array-display">
+                <div class="array-element">
+                  <div class="index">0</div>
+                  1
+                </div>
+                <div class="array-element">
+                  <div class="index">1</div>
+                  5
+                </div>
+                <div class="array-element">
+                  <div class="index">2</div>
+                  9
+                </div>
+                <div class="array-element">
+                  <div class="index">3</div>
+                  1
+                </div>
+                <div class="array-element">
+                  <div class="index">4</div>
+                  5
+                </div>
+                <div class="array-element">
+                  <div class="index">5</div>
+                  9
+                </div>
+              </div>
+              <p><strong>Window size:</strong> 3 (indexDiff + 1 = 2 + 1)</p>
+              <p>
+                <strong>Result:</strong> False - No valid pairs satisfy both
+                constraints
+              </p>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Example 3: Negative Numbers</h3>
+            <div class="step">
+              <div class="step-counter">✓</div>
+              <div class="step-content">
+                <div class="step-title">
+                  Input: nums = [-1,0,1], indexDiff = 1, valueDiff = 1
+                </div>
+                <div class="window-state">
+                  <h4>Trace:</h4>
+                  <p>i=0, num=-1: window=[], add -1 → window=[-1]</p>
+                  <p>
+                    i=1, num=0: window=[-1], range=[-1,1], bisect_left(-1)→pos 0
+                  </p>
+                  <p>window[0]=-1, is -1≤1? YES! ✅ Match found</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Critical Edge Cases</h3>
+            <div class="step">
+              <div class="step-counter">1</div>
+              <div class="step-content">
+                <strong>Empty/Single Element:</strong> Arrays with length < 2
+                should return False
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">2</div>
+              <div class="step-content">
+                <strong>valueDiff = 0:</strong> Requires exact value matches
+                within index range
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">3</div>
+              <div class="step-content">
+                <strong>Large indexDiff:</strong> When indexDiff ≥ n-1, all
+                elements are in window
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">4</div>
+              <div class="step-content">
+                <strong>Duplicate values:</strong> SortedSet handles duplicates
+                automatically
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🎓 Related Problems & Variations</h2>
+
+          <div class="subsection">
+            <h3>Similar Sliding Window + Ordered Structure Problems</h3>
+            <ul style="margin-left: 30px">
+              <li>
+                <strong>Sliding Window Maximum:</strong> Different query type on
+                window
+              </li>
+              <li>
+                <strong>Find K Closest Elements:</strong> Range queries on
+                sorted data
+              </li>
+              <li>
+                <strong>Shortest Subarray with Sum at Least K:</strong> Similar
+                window maintenance
+              </li>
+              <li>
+                <strong>Maximum Number of Visible Points:</strong> Circular
+                sliding window
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>Pattern Extensions</h3>
+            <ul style="margin-left: 30px">
+              <li>
+                <strong>2D Coordinates:</strong> Extend to find close points in
+                2D space
+              </li>
+              <li>
+                <strong>Multiple Constraints:</strong> Additional conditions on
+                the pairs
+              </li>
+              <li>
+                <strong>Dynamic Queries:</strong> Stream of elements with query
+                processing
+              </li>
+              <li>
+                <strong>K-th Closest:</strong> Find k-th nearest element instead
+                of existence
+              </li>
+              <li>
+                <strong>Range Counting:</strong> Count elements within range
+                instead of just existence
+              </li>
+            </ul>
+          </div>
+
+          <div class="highlight-box">
+            <h3>Advanced Applications</h3>
+            <p>
+              <strong>Real-world uses:</strong> Time-series analysis,
+              geolocation proximity, anomaly detection, recommendation systems
+              with temporal and similarity constraints
+            </p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📝 Interview Preparation Checklist</h2>
+
+          <div class="algorithm-flow">
+            <div class="flow-step">
+              <strong>✅ Pattern Recognition</strong><br />
+              Identify dual proximity constraints
+            </div>
+            <div class="flow-step">
+              <strong>✅ Implementation</strong><br />
+              Code SortedSet approach correctly
+            </div>
+            <div class="flow-step">
+              <strong>✅ Analysis</strong><br />
+              Explain O(n log k) complexity
+            </div>
+            <div class="flow-step">
+              <strong>✅ Edge Cases</strong><br />
+              Handle boundary conditions
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Key Discussion Points for Interviews</h3>
+            <div class="step">
+              <div class="step-counter">1</div>
+              <div class="step-content">
+                <strong>Why not brute force?</strong> Explain O(n²) vs O(n log
+                k) trade-off
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">2</div>
+              <div class="step-content">
+                <strong>Data structure choice:</strong> Why SortedSet enables
+                efficient range queries
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">3</div>
+              <div class="step-content">
+                <strong>Window maintenance:</strong> How sliding window reduces
+                search space
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">4</div>
+              <div class="step-content">
+                <strong>Binary search optimization:</strong> How bisect_left
+                finds candidates efficiently
+              </div>
+            </div>
+          </div>
+
+          <div class="tip-box">
+            <h4>Interview Communication Script</h4>
+            <p>
+              <em
+                >"I need to find pairs with both spatial and value proximity. A
+                brute force approach would be O(n²), checking all pairs, which
+                is too slow for large inputs. I'll use a sliding window to
+                maintain only elements within indexDiff distance, combined with
+                a SortedSet for O(log k) range queries to find values within
+                valueDiff. This reduces complexity to O(n log k)."</em
+              >
+            </p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🚀 Final Code Implementation</h2>
+
+          <div class="code-block">
+            <span class="keyword">class</span> Solution(<span class="keyword"
+              >object</span
+            >):
+            <span class="keyword">def</span> containsNearbyAlmostDuplicate(<span
+              class="keyword"
+              >self</span
+            >, nums, indexDiff, valueDiff):
+            <span class="string"
+              >""" Find if there exists a pair (i,j) with close indices and
+              close values. Time: O(n log indexDiff), Space: O(indexDiff) Args:
+              nums: List[int] - Array of integers indexDiff: int - Maximum
+              allowed index difference valueDiff: int - Maximum allowed value
+              difference Returns: bool - True if such pair exists, False
+              otherwise """</span
+            >
+            <span class="comment"
+              ># Guard clause: need at least 2 elements</span
+            >
+            <span class="keyword">if</span> len(nums) < 2:
+            <span class="keyword">return</span>
+            <span class="keyword">False</span>
+
+            <span class="keyword">from</span> sortedcontainers
+            <span class="keyword">import</span> SortedSet
+
+            <span class="comment"
+              ># Sliding window to maintain elements within indexDiff
+              range</span
+            >
+            window = SortedSet()
+
+            <span class="keyword">for</span> i, num
+            <span class="keyword">in</span> enumerate(nums):
+            <span class="comment"
+              ># Remove elements that are too far (outside window)</span
+            >
+            <span class="keyword">if</span> i > indexDiff: window.remove(nums[i
+            - indexDiff - 1])
+
+            <span class="comment"
+              ># Check if current number has a "close enough" neighbor in
+              window</span
+            >
+            <span class="comment"
+              ># We need to find any x in window such that abs(num - x) <=
+              valueDiff</span
+            >
+            <span class="comment"
+              ># This means x should be in range [num - valueDiff, num +
+              valueDiff]</span
+            >
+
+            <span class="comment"
+              ># Find the smallest element >= (num - valueDiff)</span
+            >
+            pos = window.bisect_left(num - valueDiff)
+
+            <span class="comment"
+              ># Check if this element exists and is within valueDiff</span
+            >
+            <span class="keyword">if</span> pos < len(window)
+            <span class="keyword">and</span> window[pos] <= num + valueDiff:
+            <span class="keyword">return</span>
+            <span class="keyword">True</span>
+
+            <span class="comment"
+              ># Add current number to window for future iterations</span
+            >
+            window.add(num)
+
+            <span class="keyword">return</span>
+            <span class="keyword">False</span>
+          </div>
+
+          <div class="subsection">
+            <h3>Key Implementation Details</h3>
+            <div class="step">
+              <div class="step-counter">1</div>
+              <div class="step-content">
+                <strong>Window Timing:</strong> Remove element at index
+                <code>i - indexDiff - 1</code> when <code>i > indexDiff</code>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">2</div>
+              <div class="step-content">
+                <strong>Range Query:</strong> Use
+                <code>bisect_left(num - valueDiff)</code> to find first
+                candidate
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">3</div>
+              <div class="step-content">
+                <strong>Boundary Check:</strong> Verify
+                <code>pos < len(window)</code> and
+                <code>window[pos] <= num + valueDiff</code>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">4</div>
+              <div class="step-content">
+                <strong>Order Matters:</strong> Search window first, then add
+                current element
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🎯 When to Use This Pattern</h2>
+
+          <div class="highlight-box">
+            <h3>Perfect for Problems Involving:</h3>
+            <ul style="margin: 15px 0 15px 30px">
+              <li>
+                <strong>Proximity constraints:</strong> Both spatial and
+                value-based
+              </li>
+              <li>
+                <strong>Range queries:</strong> Finding elements within certain
+                bounds
+              </li>
+              <li>
+                <strong>Sliding window optimization:</strong> When brute force
+                examines too many pairs
+              </li>
+              <li>
+                <strong>Ordered data maintenance:</strong> Need to keep track of
+                sorted elements
+              </li>
+              <li>
+                <strong>Dynamic datasets:</strong> Elements continuously
+                added/removed
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>Consider Alternatives When:</h3>
+            <ul style="margin-left: 30px">
+              <li>
+                <strong>Simple exact matches:</strong> Hash set might be
+                sufficient
+              </li>
+              <li>
+                <strong>Very small arrays:</strong> Brute force may be simpler
+              </li>
+              <li>
+                <strong>Memory is critical:</strong> Trade time for space with
+                different approaches
+              </li>
+              <li>
+                <strong>Stream processing:</strong> Need online algorithm for
+                continuous data
+              </li>
+              <li>
+                <strong>Multiple dimensions:</strong> Need spatial data
+                structures (KD-tree, etc.)
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🏆 Mastery Summary</h2>
+
+          <div class="highlight-box">
+            <p style="text-align: center; font-size: 1.3em; margin: 20px 0">
+              <em
+                >"The sliding window + ordered structure pattern elegantly
+                combines spatial constraints with efficient range queries,
+                transforming O(n²) proximity problems into O(n log k)
+                solutions!"</em
+              >
+            </p>
+          </div>
+
+          <div class="subsection">
+            <h3>🎯 Key Takeaways</h3>
+            <div class="step">
+              <div class="step-counter">1</div>
+              <div class="step-content">
+                <strong>Spatial Optimization:</strong> Sliding window ensures
+                only relevant elements are considered
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">2</div>
+              <div class="step-content">
+                <strong>Value Optimization:</strong> Ordered structure enables
+                O(log k) range queries
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">3</div>
+              <div class="step-content">
+                <strong>Dynamic Maintenance:</strong> Efficient add/remove as
+                window slides
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">4</div>
+              <div class="step-content">
+                <strong>Binary Search Mastery:</strong> Using bisect_left for
+                range query optimization
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-counter">5</div>
+              <div class="step-content">
+                <strong>Complexity Understanding:</strong> Know when O(n log k)
+                beats O(n²)
+              </div>
+            </div>
+          </div>
+
+          <div class="tip-box">
+            <h4>Master This Pattern and You'll Excel At:</h4>
+            <p>
+              Range queries, proximity search, sliding window optimizations, and
+              ordered data structure problems. This pattern appears frequently
+              in coding interviews and real-world applications like time-series
+              analysis, geolocation services, and recommendation systems!
+            </p>
+          </div>
+
+          <div
+            style="
+              text-align: center;
+              padding: 20px;
+              background: linear-gradient(135deg, #667eea, #764ba2);
+              color: white;
+              border-radius: 10px;
+              margin: 20px 0;
+            "
+          >
+            <h3 style="margin: 0">
+              🎯 Master the pattern, ace the interview! 🚀
+            </h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
