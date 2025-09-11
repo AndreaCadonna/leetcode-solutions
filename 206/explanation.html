@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sliding Window: Minimum Size Subarray Sum</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.2em;
+        opacity: 0.9;
+      }
+
+      .content-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        margin-bottom: 30px;
+      }
+
+      .section {
+        padding: 30px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .section:last-child {
+        border-bottom: none;
+      }
+
+      .section-title {
+        font-size: 1.8em;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::before {
+        content: "";
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 2px;
+      }
+
+      .subsection {
+        margin: 25px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+      }
+
+      .subsection h3 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+      }
+
+      .code-block {
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        overflow-x: auto;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        white-space: pre;
+        line-height: 1.5;
+        tab-size: 4;
+      }
+
+      .code-block .comment {
+        color: #68d391;
+      }
+      .code-block .keyword {
+        color: #f093fb;
+      }
+      .code-block .string {
+        color: #fbb6ce;
+      }
+
+      .visual-example {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .array-display {
+        font-family: "Courier New", monospace;
+        font-size: 16px;
+        margin: 15px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        align-items: center;
+      }
+
+      .array-element {
+        display: inline-block;
+        padding: 12px 16px;
+        margin: 3px;
+        border: 2px solid #cbd5e0;
+        border-radius: 8px;
+        background: #f7fafc;
+        min-width: 50px;
+        text-align: center;
+        transition: all 0.3s ease;
+        font-weight: bold;
+      }
+
+      .array-element:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .in-window {
+        background: #bee3f8;
+        border-color: #3182ce;
+        color: #2a4365;
+        border-width: 3px;
+        box-shadow: 0 0 10px rgba(49, 130, 206, 0.3);
+      }
+
+      .valid-sum {
+        background: #c6f6d5;
+        border-color: #38a169;
+        color: #22543d;
+        border-width: 3px;
+        box-shadow: 0 0 10px rgba(56, 161, 105, 0.3);
+      }
+
+      .minimal-window {
+        background: #fed7d7;
+        border-color: #e53e3e;
+        color: #742a2a;
+        border-width: 3px;
+        box-shadow: 0 0 15px rgba(229, 62, 62, 0.4);
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      .step {
+        display: flex;
+        align-items: flex-start;
+        margin: 20px 0;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .step-counter {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+
+      .highlight-box {
+        background: linear-gradient(135deg, #667eea10, #764ba210);
+        border: 1px solid #667eea;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .tip-box {
+        background: #fffbeb;
+        border: 1px solid #f59e0b;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        border-left: 4px solid #f59e0b;
+      }
+
+      .tip-box h4 {
+        color: #92400e;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .tip-box h4::before {
+        content: "💡";
+      }
+
+      .problem-statement {
+        background: #e6fffa;
+        border: 1px solid #38b2ac;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .problem-statement h3 {
+        color: #234e52;
+        margin-bottom: 15px;
+      }
+
+      .complexity-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+
+      .complexity-table th,
+      .complexity-table td {
+        border: 1px solid #e2e8f0;
+        padding: 12px;
+        text-align: left;
+      }
+
+      .complexity-table th {
+        background: #f7fafc;
+        font-weight: bold;
+        color: #2d3748;
+      }
+
+      .complexity-table tr:nth-child(even) {
+        background: #f9f9f9;
+      }
+
+      .algorithm-flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .flow-step {
+        flex: 1;
+        min-width: 200px;
+        padding: 15px;
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        text-align: center;
+        position: relative;
+      }
+
+      .flow-step::after {
+        content: "→";
+        position: absolute;
+        right: -25px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+        color: #667eea;
+        font-weight: bold;
+      }
+
+      .flow-step:last-child::after {
+        display: none;
+      }
+
+      .window-info {
+        background: #e6fffa;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+        font-family: "Courier New", monospace;
+      }
+
+      .window-info strong {
+        color: #234e52;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
+        }
+        .header h1 {
+          font-size: 2em;
+        }
+        .algorithm-flow {
+          flex-direction: column;
+        }
+        .flow-step::after {
+          display: none;
+        }
+        .array-display {
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎯 Sliding Window Pattern</h1>
+        <p>Minimum Size Subarray Sum - Visual Algorithm Guide</p>
+      </div>
+
+      <div class="content-card">
+        <div class="section">
+          <h2 class="section-title">🎯 Problem Understanding</h2>
+
+          <div class="problem-statement">
+            <h3>LeetCode Problem: Minimum Size Subarray Sum</h3>
+            <p>
+              <strong>Given:</strong> An array of positive integers
+              <code>nums</code> and a positive integer <code>target</code>
+            </p>
+            <p>
+              <strong>Find:</strong> The minimal length of a subarray whose sum
+              is greater than or equal to <code>target</code>
+            </p>
+            <p>
+              <strong>Return:</strong> The length, or <code>0</code> if no such
+              subarray exists
+            </p>
+          </div>
+
+          <div class="subsection">
+            <h3>Why This Problem is Tricky</h3>
+            <ul>
+              <li>
+                <strong>Optimization Challenge:</strong> Need to find the
+                SHORTEST subarray, not just any valid one
+              </li>
+              <li>
+                <strong>Dynamic Window:</strong> Window size changes based on
+                the current sum
+              </li>
+              <li>
+                <strong>Constraint Logic:</strong> Must shrink aggressively when
+                constraint is satisfied
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🔍 Why Sliding Window Pattern?</h2>
+
+          <div class="subsection">
+            <h3>Brute Force Approach (Inefficient)</h3>
+            <div class="code-block">
+              def minSubArrayLen_bruteforce(target, nums): min_len =
+              float('inf') n = len(nums)
+
+              <span class="comment"># Check every possible subarray</span>
+              <span class="keyword">for</span> i
+              <span class="keyword">in</span> range(n): current_sum = 0
+              <span class="keyword">for</span> j
+              <span class="keyword">in</span> range(i, n): current_sum +=
+              nums[j] <span class="keyword">if</span> current_sum >= target:
+              min_len = min(min_len, j - i + 1)
+              <span class="keyword">break</span>
+
+              <span class="keyword">return</span> min_len
+              <span class="keyword">if</span> min_len != float('inf')
+              <span class="keyword">else</span> 0
+            </div>
+            <p>
+              <strong>Time Complexity:</strong> O(n²) - Too slow for large
+              inputs
+            </p>
+          </div>
+
+          <div class="highlight-box">
+            <h3>🔍 Sliding Window Insight</h3>
+            <p>
+              <strong>Key Realization:</strong> Since all numbers are positive,
+              adding elements only increases the sum. This means:
+            </p>
+            <ul>
+              <li>
+                If current window sum ≥ target → try to shrink and minimize
+                length
+              </li>
+              <li>
+                If current window sum < target → must expand to reach target
+              </li>
+              <li>
+                Each element is visited at most twice (once by right, once by
+                left pointer)
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">⚙️ Algorithm Deep Dive</h2>
+
+          <div class="algorithm-flow">
+            <div class="flow-step">
+              <strong>Initialize</strong><br />
+              left = 0<br />
+              min_length = ∞
+            </div>
+            <div class="flow-step">
+              <strong>Expand</strong><br />
+              Add nums[right]<br />
+              to window sum
+            </div>
+            <div class="flow-step">
+              <strong>Check</strong><br />
+              Is sum ≥ target?<br />
+              Record length
+            </div>
+            <div class="flow-step">
+              <strong>Shrink</strong><br />
+              Remove nums[left]<br />
+              while sum ≥ target
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Core Algorithm Implementation</h3>
+            <div class="code-block">
+              def minSubArrayLen(target, nums):
+              <span class="comment"># Guard clause</span>
+              <span class="keyword">if</span> not nums:
+              <span class="keyword">return</span> 0 left = 0 current_sum = 0
+              min_length = float('inf')
+
+              <span class="comment"># Sliding window with right pointer</span>
+              <span class="keyword">for</span> right
+              <span class="keyword">in</span> range(len(nums)):
+              <span class="comment"># Expand: add current element</span>
+              current_sum += nums[right]
+
+              <span class="comment"># Shrink: while constraint satisfied</span>
+              <span class="keyword">while</span> current_sum >= target:
+              window_length = right - left + 1 min_length = min(min_length,
+              window_length) current_sum -= nums[left] left += 1
+
+              <span class="keyword">return</span> min_length
+              <span class="keyword">if</span> min_length != float('inf')
+              <span class="keyword">else</span> 0
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📊 Complete Example Walkthrough</h2>
+
+          <div class="subsection">
+            <h3>Example: target = 7, nums = [2,3,1,2,4,3]</h3>
+
+            <div class="step">
+              <div class="step-counter">1</div>
+              <div>
+                <strong>Initial State</strong>
+                <div class="window-info">
+                  <strong>Target:</strong> 7 | <strong>left:</strong> 0 |
+                  <strong>sum:</strong> 0 | <strong>min_length:</strong> ∞
+                </div>
+                <div class="array-display">
+                  <div class="array-element">2</div>
+                  <div class="array-element">3</div>
+                  <div class="array-element">1</div>
+                  <div class="array-element">2</div>
+                  <div class="array-element">4</div>
+                  <div class="array-element">3</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">2</div>
+              <div>
+                <strong>right=0: Add nums[0]=2</strong>
+                <div class="window-info">
+                  <strong>sum:</strong> 0 + 2 = 2 (< 7, no shrinking needed)
+                </div>
+                <div class="array-display">
+                  <div class="array-element in-window">2</div>
+                  <div class="array-element">3</div>
+                  <div class="array-element">1</div>
+                  <div class="array-element">2</div>
+                  <div class="array-element">4</div>
+                  <div class="array-element">3</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">3</div>
+              <div>
+                <strong>right=1: Add nums[1]=3</strong>
+                <div class="window-info">
+                  <strong>sum:</strong> 2 + 3 = 5 (< 7, no shrinking needed)
+                </div>
+                <div class="array-display">
+                  <div class="array-element in-window">2</div>
+                  <div class="array-element in-window">3</div>
+                  <div class="array-element">1</div>
+                  <div class="array-element">2</div>
+                  <div class="array-element">4</div>
+                  <div class="array-element">3</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">4</div>
+              <div>
+                <strong>right=2: Add nums[2]=1</strong>
+                <div class="window-info">
+                  <strong>sum:</strong> 5 + 1 = 6 (< 7, no shrinking needed)
+                </div>
+                <div class="array-display">
+                  <div class="array-element in-window">2</div>
+                  <div class="array-element in-window">3</div>
+                  <div class="array-element in-window">1</div>
+                  <div class="array-element">2</div>
+                  <div class="array-element">4</div>
+                  <div class="array-element">3</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">5</div>
+              <div>
+                <strong>right=3: Add nums[3]=2</strong>
+                <div class="window-info">
+                  <strong>sum:</strong> 6 + 2 = 8 (≥ 7! 🎉 Start shrinking)
+                  <br /><strong>Window length:</strong> 3-0+1 = 4 →
+                  <strong>min_length = 4</strong> <br /><strong>Shrink:</strong>
+                  sum = 8-2 = 6, left = 1 (< 7, stop shrinking)
+                </div>
+                <div class="array-display">
+                  <div class="array-element">2</div>
+                  <div class="array-element valid-sum">3</div>
+                  <div class="array-element valid-sum">1</div>
+                  <div class="array-element valid-sum">2</div>
+                  <div class="array-element">4</div>
+                  <div class="array-element">3</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">6</div>
+              <div>
+                <strong>right=4: Add nums[4]=4</strong>
+                <div class="window-info">
+                  <strong>sum:</strong> 6 + 4 = 10 (≥ 7! Shrink again)
+                  <br /><strong>Shrink 1:</strong> sum = 10-3 = 7, left = 2 (≥
+                  7, continue) <br /><strong>Window length:</strong> 4-2+1 = 3 →
+                  <strong>min_length = 3</strong> <br /><strong
+                    >Shrink 2:</strong
+                  >
+                  sum = 7-1 = 6, left = 3 (< 7, stop)
+                </div>
+                <div class="array-display">
+                  <div class="array-element">2</div>
+                  <div class="array-element">3</div>
+                  <div class="array-element">1</div>
+                  <div class="array-element valid-sum">2</div>
+                  <div class="array-element valid-sum">4</div>
+                  <div class="array-element">3</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-counter">7</div>
+              <div>
+                <strong>right=5: Add nums[5]=3</strong>
+                <div class="window-info">
+                  <strong>sum:</strong> 6 + 3 = 9 (≥ 7! Final shrinking)
+                  <br /><strong>Shrink 1:</strong> sum = 9-2 = 7, left = 4 (≥ 7,
+                  continue) <br /><strong>Window length:</strong> 5-4+1 = 2 →
+                  <strong>min_length = 2 🎉</strong> <br /><strong
+                    >Shrink 2:</strong
+                  >
+                  sum = 7-4 = 3, left = 5 (< 7, stop)
+                </div>
+                <div class="array-display">
+                  <div class="array-element">2</div>
+                  <div class="array-element">3</div>
+                  <div class="array-element">1</div>
+                  <div class="array-element">2</div>
+                  <div class="array-element minimal-window">4</div>
+                  <div class="array-element minimal-window">3</div>
+                </div>
+                <p>
+                  <strong>🎉 Found minimal window [4,3] with length 2!</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📈 Complexity Analysis</h2>
+
+          <table class="complexity-table">
+            <tr>
+              <th>Approach</th>
+              <th>Time Complexity</th>
+              <th>Space Complexity</th>
+              <th>Explanation</th>
+            </tr>
+            <tr>
+              <td>Brute Force</td>
+              <td>O(n²)</td>
+              <td>O(1)</td>
+              <td>Check every possible subarray</td>
+            </tr>
+            <tr>
+              <td><strong>Sliding Window</strong></td>
+              <td><strong>O(n)</strong></td>
+              <td><strong>O(1)</strong></td>
+              <td>Each element visited at most twice</td>
+            </tr>
+          </table>
+
+          <div class="highlight-box">
+            <h3>Why O(n) Time Complexity?</h3>
+            <p>
+              <strong>Key Insight:</strong> Although we have nested loops (for +
+              while), each element is processed at most twice:
+            </p>
+            <ul>
+              <li>
+                <strong>Once by right pointer:</strong> When expanding the
+                window
+              </li>
+              <li>
+                <strong>Once by left pointer:</strong> When shrinking the window
+              </li>
+              <li><strong>Total operations:</strong> 2n → O(n)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">💡 Pro Tips & Tricks</h2>
+
+          <div class="tip-box">
+            <h4>Sliding Window Mastery</h4>
+            <ul>
+              <li>
+                <strong
+                  >Always define your expand and shrink rules clearly</strong
+                >
+                before coding
+              </li>
+              <li>
+                <strong>Use while loop for shrinking</strong> - don't assume you
+                shrink by only one element
+              </li>
+              <li>
+                <strong>Update answer during shrinking phase</strong> when
+                constraint is satisfied
+              </li>
+              <li>
+                <strong>Handle edge cases upfront</strong> - empty arrays,
+                impossible targets
+              </li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>Interview Communication</h4>
+            <ul>
+              <li>
+                <strong>Start with brute force:</strong> Shows you can solve it,
+                establishes baseline
+              </li>
+              <li>
+                <strong>Explain the insight:</strong> "Since all numbers are
+                positive, sum is monotonic"
+              </li>
+              <li>
+                <strong>Walk through the algorithm:</strong> Expand when sum <
+                target, shrink when sum ≥ target
+              </li>
+              <li>
+                <strong>Trace a small example:</strong> Helps verify your logic
+              </li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>Common Pitfalls</h4>
+            <ul>
+              <li>
+                <strong>Recording answer too early:</strong> Only record when
+                constraint is satisfied
+              </li>
+              <li>
+                <strong>Forgetting to shrink aggressively:</strong> Use while
+                loop, not if statement
+              </li>
+              <li>
+                <strong>Off-by-one errors:</strong> Window length = right - left
+                + 1
+              </li>
+              <li>
+                <strong>Not handling impossible cases:</strong> Return 0 when no
+                valid subarray exists
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🧪 Additional Examples & Edge Cases</h2>
+
+          <div class="subsection">
+            <h3>Example 2: target = 4, nums = [1,4,4]</h3>
+            <div class="visual-example">
+              <p><strong>Expected Output:</strong> 1</p>
+              <div class="array-display">
+                <div class="array-element">1</div>
+                <div class="array-element minimal-window">4</div>
+                <div class="array-element">4</div>
+              </div>
+              <p>
+                <strong>Explanation:</strong> Single element [4] satisfies sum ≥
+                4
+              </p>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Example 3: target = 11, nums = [1,1,1,1,1,1,1,1]</h3>
+            <div class="visual-example">
+              <p><strong>Expected Output:</strong> 0</p>
+              <div class="array-display">
+                <div class="array-element">1</div>
+                <div class="array-element">1</div>
+                <div class="array-element">1</div>
+                <div class="array-element">1</div>
+                <div class="array-element">1</div>
+                <div class="array-element">1</div>
+                <div class="array-element">1</div>
+                <div class="array-element">1</div>
+              </div>
+              <p>
+                <strong>Explanation:</strong> Sum of all elements = 8 < 11,
+                impossible to achieve target
+              </p>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Edge Cases to Consider</h3>
+            <ul>
+              <li><strong>Empty array:</strong> [] → return 0</li>
+              <li>
+                <strong>Single element sufficient:</strong> [10], target=5 →
+                return 1
+              </li>
+              <li>
+                <strong>Single element insufficient:</strong> [1], target=5 →
+                return 0
+              </li>
+              <li>
+                <strong>All elements needed:</strong> [1,1,1], target=3 → return
+                3
+              </li>
+              <li>
+                <strong>Target equals single element:</strong> [3,2,1], target=3
+                → return 1
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🔧 Optimization Techniques</h2>
+
+          <div class="subsection">
+            <h3>Early Termination Optimization</h3>
+            <div class="code-block">
+              def minSubArrayLen_optimized(target, nums):
+              <span class="keyword">if</span> not nums:
+              <span class="keyword">return</span> 0
+
+              <span class="comment"
+                ># Early termination: if max element >= target</span
+              >
+              <span class="keyword">if</span> max(nums) >= target:
+              <span class="keyword">return</span> 1
+
+              <span class="comment"
+                ># Early termination: if sum of all < target</span
+              >
+              <span class="keyword">if</span> sum(nums) < target:
+              <span class="keyword">return</span> 0
+
+              <span class="comment"># Standard sliding window logic...</span>
+            </div>
+          </div>
+
+          <div class="subsection">
+            <h3>Space-Time Trade-offs</h3>
+            <ul>
+              <li>
+                <strong>Current approach:</strong> O(n) time, O(1) space -
+                optimal for this problem
+              </li>
+              <li>
+                <strong>Prefix sum approach:</strong> O(n log n) time with
+                binary search, O(n) space
+              </li>
+              <li>
+                <strong>No better solution exists</strong> - sliding window is
+                optimal
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🎓 Related Problems & Variations</h2>
+
+          <div class="subsection">
+            <h3>Same Pattern (Variable Sliding Window)</h3>
+            <ul>
+              <li>
+                <strong>Longest Substring Without Repeating Characters</strong>
+                - Expand until duplicate, shrink until valid
+              </li>
+              <li>
+                <strong>Minimum Window Substring</strong> - Find shortest window
+                containing all characters
+              </li>
+              <li>
+                <strong
+                  >Longest Substring with At Most K Distinct Characters</strong
+                >
+                - Maintain window with ≤ K distinct chars
+              </li>
+              <li>
+                <strong>Subarray Product Less Than K</strong> - Similar
+                shrinking logic with product constraint
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>Pattern Variations</h3>
+            <ul>
+              <li>
+                <strong>Fixed Window:</strong> Maximum Average Subarray I -
+                window size is fixed
+              </li>
+              <li>
+                <strong>Two Pointers:</strong> Container With Most Water -
+                optimize area with two pointers
+              </li>
+              <li>
+                <strong>Multi-Window:</strong> Sliding Window Maximum - maintain
+                maximum in each window
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>Difficulty Progressions</h3>
+            <ul>
+              <li>
+                <strong>Easy:</strong> Maximum Average Subarray I (fixed window)
+              </li>
+              <li>
+                <strong>Medium:</strong> Minimum Size Subarray Sum (current
+                problem)
+              </li>
+              <li>
+                <strong>Hard:</strong> Minimum Window Substring (character
+                frequency tracking)
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">📝 Interview Preparation Checklist</h2>
+
+          <div class="subsection">
+            <h3>✅ Before the Interview</h3>
+            <ul>
+              <li>
+                <strong>Master the pattern template</strong> - Know
+                expand/shrink logic by heart
+              </li>
+              <li>
+                <strong>Practice edge cases</strong> - Empty arrays, single
+                elements, impossible targets
+              </li>
+              <li>
+                <strong>Understand complexity</strong> - Why it's O(n) despite
+                nested loops
+              </li>
+              <li>
+                <strong>Know related problems</strong> - Be ready to discuss
+                variations
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>✅ During the Interview</h3>
+            <ul>
+              <li>
+                <strong>Clarify constraints</strong> - Are all numbers positive?
+                Can array be empty?
+              </li>
+              <li>
+                <strong>Start with brute force</strong> - Shows you can solve
+                it, sets up optimization
+              </li>
+              <li>
+                <strong>Explain the insight</strong> - Why sliding window works
+                for this problem
+              </li>
+              <li>
+                <strong>Code systematically</strong> - Guards → Setup → Main
+                loop → Return
+              </li>
+              <li>
+                <strong>Test with examples</strong> - Walk through your code
+                with given examples
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>✅ Communication Script</h3>
+            <div class="code-block">
+              <span class="string"
+                >"Let me restate: find the shortest subarray with sum >= target.
+                I'll start with a brute force O(n²) approach checking all
+                subarrays. For optimization, since all numbers are positive, the
+                sum is monotonic. This suggests sliding window: expand when sum
+                < target, shrink when sum >= target. Each element is visited at
+                most twice, so O(n) time, O(1) space. Let me implement this
+                systematically..."</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🚀 Final Code Implementation</h2>
+
+          <div class="code-block">
+            class Solution(object): def minSubArrayLen(self, target, nums): """
+            Find the minimal length of subarray whose sum is >= target. Args:
+            target (int): Target sum value nums (List[int]): Array of positive
+            integers Returns: int: Minimal length of valid subarray, or 0 if
+            none exists """
+            <span class="comment"># Guard clause: handle edge cases</span>
+            <span class="keyword">if</span> not nums:
+            <span class="keyword">return</span> 0 n = len(nums) left = 0
+            current_sum = 0 min_length = float('inf')
+
+            <span class="comment"
+              ># Sliding window: expand with right, shrink with left</span
+            >
+            <span class="keyword">for</span> right
+            <span class="keyword">in</span> range(n):
+            <span class="comment"># Expand: add current element to window</span>
+            current_sum += nums[right]
+
+            <span class="comment"
+              ># Shrink: while constraint satisfied, minimize length</span
+            >
+            <span class="keyword">while</span> current_sum >= target:
+            <span class="comment"># Record current window length</span>
+            window_length = right - left + 1 min_length = min(min_length,
+            window_length)
+
+            <span class="comment"># Shrink window from left</span>
+            current_sum -= nums[left] left += 1
+
+            <span class="comment"
+              ># Return result: 0 if no valid subarray found</span
+            >
+            <span class="keyword">return</span> min_length
+            <span class="keyword">if</span> min_length != float('inf')
+            <span class="keyword">else</span> 0
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🎯 When to Use This Pattern</h2>
+
+          <div class="highlight-box">
+            <h3>🎯 Variable Sliding Window Recognition</h3>
+            <p>Use this pattern when you see:</p>
+            <ul>
+              <li><strong>Contiguous subarray/substring</strong> problems</li>
+              <li>
+                <strong>Minimize/maximize length</strong> with a constraint
+              </li>
+              <li>
+                <strong>Monotonic property</strong> - adding elements makes
+                constraint easier/harder
+              </li>
+              <li>
+                <strong>Efficient state updates</strong> - can maintain window
+                state in O(1)
+              </li>
+            </ul>
+          </div>
+
+          <div class="subsection">
+            <h3>Pattern Template</h3>
+            <div class="code-block">
+              def sliding_window_variable(arr, constraint): left = 0 state =
+              initialize_state() best = initialize_best()
+
+              <span class="keyword">for</span> right
+              <span class="keyword">in</span> range(len(arr)):
+              <span class="comment"
+                ># Expand: add arr[right] to window state</span
+              >
+              update_state_expand(state, arr[right])
+
+              <span class="comment"># Shrink: while constraint satisfied</span>
+              <span class="keyword">while</span> constraint_satisfied(state):
+              <span class="comment"># Record answer if optimizing</span>
+              best = update_best(best, right - left + 1)
+
+              <span class="comment"># Shrink: remove arr[left] from state</span>
+              update_state_shrink(state, arr[left]) left += 1
+
+              <span class="keyword">return</span> best
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">🏆 Mastery Summary</h2>
+
+          <div class="highlight-box">
+            <h3>🏆 Key Takeaways</h3>
+            <ul>
+              <li>
+                <strong>Pattern Recognition:</strong> Variable sliding window
+                for "shortest/longest subarray with constraint"
+              </li>
+              <li>
+                <strong>Core Insight:</strong> Monotonic property enables
+                efficient expand/shrink strategy
+              </li>
+              <li>
+                <strong>Implementation:</strong> Always use while loop for
+                shrinking, if loop for expanding
+              </li>
+              <li>
+                <strong>Complexity:</strong> O(n) time despite nested loops -
+                each element visited twice max
+              </li>
+              <li>
+                <strong>Applications:</strong> Fundamental pattern for many
+                string/array optimization problems
+              </li>
+            </ul>
+          </div>
+
+          <div class="tip-box">
+            <h4>Master's Mindset</h4>
+            <p>
+              <strong
+                >"The sliding window isn't just a technique - it's a way of
+                thinking about sequential data optimization. When you see
+                'contiguous' + 'optimize', think window. When you see 'monotonic
+                property', think expand/shrink strategy."</strong
+              >
+            </p>
+          </div>
+
+          <div class="subsection">
+            <h3>🎯 What's Next?</h3>
+            <ul>
+              <li>
+                <strong>Practice similar problems:</strong> Longest Substring
+                Without Repeating Characters
+              </li>
+              <li>
+                <strong>Learn advanced variations:</strong> Minimum Window
+                Substring with character frequency
+              </li>
+              <li>
+                <strong>Explore related patterns:</strong> Two Pointers, Fixed
+                Sliding Window
+              </li>
+              <li>
+                <strong>Master the communication:</strong> Practice explaining
+                the insight clearly
+              </li>
+            </ul>
+          </div>
+
+          <div class="problem-statement">
+            <h3>🚀 Ready for Your Next Challenge?</h3>
+            <p>
+              You've mastered the Variable Sliding Window pattern! This
+              foundation will help you tackle dozens of similar problems. The
+              key is recognizing the pattern indicators and applying the
+              systematic approach.
+            </p>
+            <p>
+              <strong>Remember:</strong> Great algorithms aren't just about the
+              code - they're about the insights that make them possible. You now
+              understand why sliding window works and when to use it. That's the
+              mark of a true algorithmic thinker! 🎯
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
